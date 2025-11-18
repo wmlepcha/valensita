@@ -1,81 +1,92 @@
-import { Head } from '@inertiajs/react';
+import MainLayout from '@/Layouts/MainLayout';
+import Hero from '@/Components/Hero';
+import FeaturedProducts from '@/Components/FeaturedProducts';
+import FeaturedCategories from '@/Components/FeaturedCategories';
+import Newsletter from '@/Components/Newsletter';
 
 export default function Main() {
+  // Sample data - replace with real data from props
+  const featuredProducts = [
+    {
+      id: 1,
+      name: 'Essential Hoodie',
+      price: 8999,
+      originalPrice: 12000,
+      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=800&fit=crop',
+      hoverImage: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&h=800&fit=crop',
+      badge: 'Sale',
+      badgeVariant: 'accent' as const,
+      category: 'Hoodies',
+    },
+    {
+      id: 2,
+      name: 'Graphic Tee',
+      price: 4499,
+      image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=800&fit=crop',
+      badge: 'New',
+      badgeVariant: 'electric' as const,
+      category: 'T-Shirts',
+    },
+    {
+      id: 3,
+      name: 'Premium Hoodie',
+      price: 13999,
+      image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&h=800&fit=crop',
+      badge: 'Premium',
+      badgeVariant: 'brand' as const,
+      category: 'Hoodies',
+    },
+    {
+      id: 4,
+      name: 'Classic Tee',
+      price: 3799,
+      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop',
+      category: 'T-Shirts',
+    },
+  ];
+
+  const categories = [
+    {
+      name: 'Hoodies',
+      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=600&fit=crop',
+      link: '/category/hoodies',
+      description: 'Cozy essentials',
+    },
+    {
+      name: 'T-Shirts',
+      image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=600&fit=crop',
+      link: '/category/tshirts',
+      description: 'Everyday style',
+    },
+  ];
+
   return (
-    <>
-      <Head title="VALENSITA" />
+    <MainLayout title="Home - VALENSITA">
+      {/* Hero Section */}
+      <Hero />
 
-      {/* Page shell using DaisyUI theme tokens */}
-      <div className="min-h-screen bg-gradient-to-b from-base-200 via-base-100 to-base-200">
-        {/* Top bar */}
-        <div className="navbar bg-base-100/80 backdrop-blur supports-[backdrop-filter]:bg-base-100/60 border-b border-base-200">
-          <div className="navbar-start" />
-          <div className="navbar-center">
-            <a className="btn btn-ghost normal-case text-2xl font-black tracking-widest">VALENSITA</a>
-          </div>
-          <div className="navbar-end" />
-        </div>
+      {/* Featured Products */}
+      <FeaturedProducts
+        title="New Arrivals"
+        subtitle="Fresh drops from the latest collections"
+        products={featuredProducts}
+        viewAllLink="/shop"
+      />
 
-        {/* Centered hero section */}
-        <div className="hero min-h-[calc(100vh-4rem)]">
-          <div className="hero-content w-full max-w-5xl flex-col">
-            {/* Badge + headline */}
-            <div className="mb-4">
-              <div className="badge badge-primary badge-outline">E‑commerce</div>
-            </div>
+      {/* Featured Categories */}
+      <FeaturedCategories categories={categories} />
 
-            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-center">
-              Something delightful is <span className="text-primary">coming</span>
-            </h1>
+      {/* More Featured Products */}
+      <FeaturedProducts
+        title="Trending Now"
+        subtitle="What everyone's wearing this season"
+        products={featuredProducts.slice().reverse()}
+        viewAllLink="/trending"
+      />
 
-            <p className="mt-4 max-w-2xl text-center text-base-content/70 text-lg">
-              VALENSITA — a modern, elegant shopping experience. Starting soon.
-            </p>
-
-            {/* Countdown (static placeholder) */}
-            <div className="mt-6 grid grid-flow-col gap-5 text-center auto-cols-max">
-              <div className="rounded-box bg-base-100 p-4 shadow">
-                <span className="countdown font-mono text-4xl">
-                  <span style={{['--value' as any]: 12}} />
-                </span>
-                <div className="text-xs opacity-70">days</div>
-              </div>
-              <div className="rounded-box bg-base-100 p-4 shadow">
-                <span className="countdown font-mono text-4xl">
-                  <span style={{['--value' as any]: 8}} />
-                </span>
-                <div className="text-xs opacity-70">hours</div>
-              </div>
-              <div className="rounded-box bg-base-100 p-4 shadow">
-                <span className="countdown font-mono text-4xl">
-                  <span style={{['--value' as any]: 45}} />
-                </span>
-                <div className="text-xs opacity-70">min</div>
-              </div>
-              <div className="rounded-box bg-base-100 p-4 shadow">
-                <span className="countdown font-mono text-4xl">
-                  <span style={{['--value' as any]: 12}} />
-                </span>
-                <div className="text-xs opacity-70">sec</div>
-              </div>
-            </div>
-
-            {/* Notify form (disabled for now) */}
-            <div className="mt-8 w-full max-w-md">
-              <div className="join w-full">
-                <input disabled type="email" placeholder="Email for launch updates" className="input input-bordered join-item w-full" />
-                <button disabled className="btn btn-primary join-item">Notify Me</button>
-              </div>
-              <p className="text-xs opacity-60 mt-2 text-center">We’ll never share your email. Feature coming soon.</p>
-            </div>
-
-            {/* Footer mini */}
-            <div className="mt-10 text-sm opacity-60">© {new Date().getFullYear()} VALENSITA</div>
-          </div>
-        </div>
-      </div>
-    </>
+      {/* Newsletter */}
+      <Newsletter />
+    </MainLayout>
   );
 }
-
 

@@ -1,3 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Global typography styles */
+  html {
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply font-sans text-neutral-900 bg-neutral-50;
+  }
+
+  /* Heading styles - bold, luxury streetwear aesthetic */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+
+  h1 {
+    @apply text-5xl md:text-6xl lg:text-7xl;
+  }
+
+  h2 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+
+  h3 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h4 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h5 {
+    @apply text-xl md:text-2xl;
+  }
+
+  h6 {
+    @apply text-lg md:text-xl;
+  }
+
+  /* Smooth transitions */
+  a, button {
+    @apply transition-all duration-200;
+  }
+}
+
+@layer components {
+  /* Container system with consistent spacing */
+  .container-custom {
+    @apply mx-auto px-4 md:px-6 lg:px-8 max-w-7xl;
+  }
+
+  .container-narrow {
+    @apply mx-auto px-4 md:px-6 lg:px-8 max-w-5xl;
+  }
+
+  .container-wide {
+    @apply mx-auto px-4 md:px-6 lg:px-8 max-w-[1440px];
+  }
+
+  /* Section spacing - unified system */
+  .section-spacing {
+    @apply py-12 md:py-16 lg:py-24;
+  }
+
+  .section-spacing-sm {
+    @apply py-8 md:py-12 lg:py-16;
+  }
+
+  .section-spacing-lg {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+
+  /* Text utilities */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Focus ring - luxury brand style */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-neutral-50;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-primary {
+    @apply bg-gradient-to-br from-brand-500 to-brand-700;
+  }
+
+  .gradient-accent {
+    @apply bg-gradient-to-br from-accent-purple to-accent-pink;
+  }
+
+  .gradient-electric {
+    @apply bg-gradient-to-br from-accent-electric to-brand-500;
+  }
+}
+
+@layer utilities {
+  /* Custom utility classes */
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.1);
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+  }
+
+  /* Overlay utilities */
+  .overlay-dark {
+    @apply absolute inset-0 bg-neutral-900/60;
+  }
+
+  .overlay-light {
+    @apply absolute inset-0 bg-neutral-50/80;
+  }
+
+  /* Aspect ratio helpers */
+  .aspect-product {
+    aspect-ratio: 3/4;
+  }
+
+  .aspect-hero {
+    aspect-ratio: 16/9;
+  }
+
+  /* Grid systems */
+  .grid-products {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6;
+  }
+
+  .grid-products-wide {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+}
