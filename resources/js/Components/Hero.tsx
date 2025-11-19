@@ -16,7 +16,7 @@ const slides: Slide[] = [
     id: 1,
     title: 'Borg Bomber Jacket In Black',
     price: '₹29,999',
-    image: '/storage/images/model1.webp',
+    image: '/storage/images/valensita-model-1.png',
     lining: '100% Polyester',
     material: 'Size Medium',
     height: '6.2/191 cm',
@@ -25,7 +25,7 @@ const slides: Slide[] = [
     id: 2,
     title: 'Essential Oversized Hoodie',
     price: '₹18,999',
-    image: '/storage/images/model2.webp',
+    image: '/storage/images/valensita-model-2.png',
     lining: '100% Cotton',
     material: 'Size Large',
     height: '6.0/183 cm',
@@ -34,7 +34,7 @@ const slides: Slide[] = [
     id: 3,
     title: 'Premium Graphic Tee',
     price: '₹8,499',
-    image: '/storage/images/model3.webp',
+    image: '/storage/images/valensita-model-3.png',
     lining: '100% Cotton',
     material: 'Size Medium',
     height: '5.11/180 cm',
@@ -47,19 +47,23 @@ export default function Hero() {
 
   useEffect(() => {
     const slideTimer = setTimeout(() => {
-      handleNext();
-    }, 3000);
+      if (!isAnimating) {
+        setIsAnimating(true);
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+        setTimeout(() => setIsAnimating(false), 600);
+      }
+    }, 2000); // Auto-advance every 2 seconds
 
     return () => {
       clearTimeout(slideTimer);
     };
-  }, [currentSlide]);
+  }, [currentSlide, isAnimating]);
 
   const handleNext = () => {
     if (!isAnimating) {
       setIsAnimating(true);
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-      setTimeout(() => setIsAnimating(false), 800);
+      setTimeout(() => setIsAnimating(false), 600);
     }
   };
 
@@ -67,7 +71,7 @@ export default function Hero() {
     if (!isAnimating) {
       setIsAnimating(true);
       setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-      setTimeout(() => setIsAnimating(false), 800);
+      setTimeout(() => setIsAnimating(false), 600);
     }
   };
 
@@ -217,7 +221,7 @@ export default function Hero() {
         @keyframes scaleIn {
           from {
             opacity: 0;
-            transform: scale(0.9);
+            transform: scale(0.95);
           }
           to {
             opacity: 1;
@@ -225,16 +229,30 @@ export default function Hero() {
           }
         }
 
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
         .animate-slide-in-left {
-          animation: slideInLeft 0.8s ease-out;
+          animation: slideInLeft 0.6s ease-out;
         }
 
         .animate-slide-in-right {
-          animation: slideInRight 0.8s ease-out;
+          animation: slideInRight 0.6s ease-out;
         }
 
         .animate-scale-in {
-          animation: scaleIn 0.8s ease-out;
+          animation: scaleIn 0.6s ease-out;
+        }
+
+        /* Smooth transition for image changes */
+        img {
+          animation: fadeIn 0.6s ease-out;
         }
       `}</style>
     </section>
