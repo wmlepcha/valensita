@@ -6,7 +6,42 @@ import Newsletter from '@/Components/Newsletter';
 
 export default function Main() {
   // Sample data - replace with real data from props
-  const featuredProducts = [
+  const newArrivalProducts = [
+    {
+      id: 1,
+      name: 'Bamboozled T-Shirt',
+      price: 5200,
+      image: '/storage/images/valensita-card-print.png',
+      badge: 'Look 01',
+      category: 'Drop 07',
+    },
+    {
+      id: 2,
+      name: 'Bark T-Shirt',
+      price: 5800,
+      image: '/storage/images/valensita-devil-print.png',
+      badge: 'Look 02',
+      category: 'Drop 07',
+    },
+    {
+      id: 3,
+      name: 'Black Stomp T-Shirt',
+      price: 5800,
+      image: '/storage/images/valensita-tiger-print.png',
+      badge: 'Look 03',
+      category: 'Drop 07',
+    },
+    {
+      id: 4,
+      name: 'Grey Night Wing T-Shirt',
+      price: 5800,
+      image: '/storage/images/valensita-trial-print.png',
+      badge: 'Look 04',
+      category: 'Drop 07',
+    },
+  ];
+
+  const trendingProducts = [
     {
       id: 1,
       name: 'Essential Hoodie',
@@ -69,8 +104,9 @@ export default function Main() {
       <FeaturedProducts
         title="New Arrivals"
         subtitle="Fresh drops from the latest collections"
-        products={featuredProducts}
+        products={newArrivalProducts}
         viewAllLink="/shop"
+        variant="editorial"
       />
 
       {/* Featured Categories */}
@@ -80,7 +116,7 @@ export default function Main() {
       <FeaturedProducts
         title="Trending Now"
         subtitle="What everyone's wearing this season"
-        products={featuredProducts.slice().reverse()}
+        products={trendingProducts.slice().reverse()}
         viewAllLink="/trending"
       />
 
