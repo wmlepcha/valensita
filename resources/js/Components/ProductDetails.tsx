@@ -39,9 +39,9 @@ export default function ProductDetails({
   const hasDiscount = originalPrice && originalPrice > price;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10 lg:gap-12">
       {/* Image Gallery */}
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         {/* Main Image */}
         <div className="relative aspect-product bg-neutral-100 rounded-xl overflow-hidden">
           <img
@@ -60,7 +60,7 @@ export default function ProductDetails({
 
         {/* Thumbnail Gallery */}
         {images.length > 1 && (
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-4 gap-2 md:gap-3">
             {images.map((image, index) => (
               <button
                 key={index}
@@ -83,21 +83,21 @@ export default function ProductDetails({
       </div>
 
       {/* Product Information */}
-      <div className="space-y-8">
+      <div className="space-y-6 md:space-y-7 lg:space-y-8">
         {/* Header */}
-        <div className="space-y-4">
-          <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider">
+        <div className="space-y-3 md:space-y-4">
+          <p className="text-xs md:text-sm font-medium text-neutral-500 uppercase tracking-wider">
             {category}
           </p>
-          <h1 className="font-display font-bold text-4xl tracking-tight">
+          <h1 className="font-display font-bold text-3xl md:text-3xl lg:text-4xl tracking-tight">
             {name}
           </h1>
-          <div className="flex items-center gap-4">
-            <span className="font-display font-bold text-3xl text-neutral-900">
+          <div className="flex items-center gap-3 md:gap-4">
+            <span className="font-display font-bold text-2xl md:text-2xl lg:text-3xl text-neutral-900">
               {formatPrice(price)}
             </span>
             {hasDiscount && (
-              <span className="font-display text-xl text-neutral-400 line-through">
+              <span className="font-display text-lg md:text-xl text-neutral-400 line-through">
                 {formatPrice(originalPrice!)}
               </span>
             )}
@@ -108,23 +108,23 @@ export default function ProductDetails({
         </div>
 
         {/* Description */}
-        <div className="border-t border-neutral-200 pt-6">
-          <p className="text-neutral-700 leading-relaxed">{description}</p>
+        <div className="border-t border-neutral-200 pt-5 md:pt-6">
+          <p className="text-sm md:text-base text-neutral-700 leading-relaxed">{description}</p>
         </div>
 
         {/* Color Selection */}
         {colors && colors.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-2 md:space-y-3">
             <label className="block text-sm font-medium text-neutral-700">
               Color: <span className="font-bold">{selectedColor}</span>
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-2 md:gap-3">
               {colors.map((color) => (
                 <button
                   key={color.name}
                   onClick={() => setSelectedColor(color.name)}
                   className={`
-                    w-12 h-12 rounded-lg border-2 transition-all
+                    w-10 h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 rounded-lg border-2 transition-all
                     ${selectedColor === color.name ? 'border-neutral-900 ring-2 ring-neutral-900 ring-offset-2' : 'border-neutral-200 hover:border-neutral-300'}
                   `}
                   style={{ backgroundColor: color.hex }}
@@ -136,17 +136,17 @@ export default function ProductDetails({
         )}
 
         {/* Size Selection */}
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           <label className="block text-sm font-medium text-neutral-700">
             Size
           </label>
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-4 gap-2 md:gap-3">
             {sizes.map((size) => (
               <button
                 key={size}
                 onClick={() => setSelectedSize(size)}
                 className={`
-                  py-3 rounded-lg border-2 font-display font-semibold transition-all
+                  py-2.5 md:py-3 text-sm md:text-base rounded-lg border-2 font-display font-semibold transition-all
                   ${selectedSize === size
                     ? 'border-neutral-900 bg-neutral-900 text-neutral-50'
                     : 'border-neutral-200 hover:border-neutral-900'
@@ -160,27 +160,27 @@ export default function ProductDetails({
         </div>
 
         {/* Quantity */}
-        <div className="space-y-3">
+        <div className="space-y-2 md:space-y-3">
           <label className="block text-sm font-medium text-neutral-700">
             Quantity
           </label>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-12 h-12 flex items-center justify-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 transition-colors"
+              className="w-10 h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 flex items-center justify-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
               </svg>
             </button>
-            <span className="font-display font-bold text-xl min-w-[3rem] text-center">
+            <span className="font-display font-bold text-lg md:text-xl min-w-[2.5rem] md:min-w-[3rem] text-center">
               {quantity}
             </span>
             <button
               onClick={() => setQuantity(quantity + 1)}
-              className="w-12 h-12 flex items-center justify-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 transition-colors"
+              className="w-10 h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 flex items-center justify-center border-2 border-neutral-200 rounded-lg hover:border-neutral-900 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </button>
@@ -188,7 +188,7 @@ export default function ProductDetails({
         </div>
 
         {/* Add to Cart */}
-        <div className="space-y-3 pt-4">
+        <div className="space-y-3 pt-3 md:pt-4">
           <Button
             variant="primary"
             size="lg"
@@ -203,7 +203,7 @@ export default function ProductDetails({
         </div>
 
         {/* Additional Info */}
-        <div className="border-t border-neutral-200 pt-6 space-y-4 text-sm">
+        <div className="border-t border-neutral-200 pt-5 md:pt-6 space-y-3 md:space-y-4 text-xs md:text-sm">
           <div className="flex items-start gap-3">
             <svg className="w-5 h-5 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />

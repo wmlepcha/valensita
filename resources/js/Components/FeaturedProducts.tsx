@@ -21,7 +21,7 @@ interface FeaturedProductsProps {
   subtitle?: string;
   products: Product[];
   viewAllLink?: string;
-  variant?: 'default' | 'wide' | 'editorial';
+  variant?: 'default' | 'wide' | 'editorial' | 'simple';
 }
 
 export default function FeaturedProducts({
@@ -32,6 +32,7 @@ export default function FeaturedProducts({
   variant = 'default',
 }: FeaturedProductsProps) {
   const isEditorial = variant === 'editorial';
+  const isSimple = variant === 'simple';
   const gridVariant = variant === 'wide' ? 'wide' : 'default';
   const sectionClassName = [
     'section-spacing',
@@ -86,7 +87,52 @@ export default function FeaturedProducts({
         )}
 
         {/* Products Grid */}
-        {isEditorial ? (
+        {isSimple ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+                className="group block"
+              >
+                <div className="relative aspect-[3/4] bg-neutral-100 rounded-lg overflow-hidden mb-3">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  {product.badge && (
+                    <div className="absolute top-3 left-3">
+                      <span className="px-3 py-1 bg-brand-500 text-white text-[10px] font-semibold uppercase tracking-wider rounded-full">
+                        {product.badge}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  {product.category && (
+                    <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
+                      {product.category}
+                    </p>
+                  )}
+                  <h3 className="text-sm font-medium text-neutral-900 group-hover:text-brand-600 transition-colors">
+                    {product.name}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-neutral-900">
+                      {formatPrice(product.price)}
+                    </span>
+                    {product.originalPrice && product.originalPrice > product.price && (
+                      <span className="text-xs text-neutral-400 line-through">
+                        {formatPrice(product.originalPrice)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : isEditorial ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
             {products.map((product) => (
               <Link

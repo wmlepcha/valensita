@@ -90,7 +90,7 @@ export default function Header() {
   return (
     <>
       <header className={headerClasses}>
-        <div className="container mx-auto px-6">
+        <div className="container-wide">
           <div className="flex items-center justify-between h-16">
             {/* Left Navigation */}
             <nav className="hidden lg:flex items-center gap-8">
@@ -297,7 +297,7 @@ export default function Header() {
         {/* Bridge area to prevent gap issues */}
         <div className="absolute -top-4 left-0 right-0 h-4" />
         
-        <div className="container mx-auto px-6 py-12">
+        <div className="container-wide py-12">
           <div className="grid grid-cols-4 gap-12">
             {/* Left Column - Categories */}
             <div>
@@ -391,7 +391,7 @@ export default function Header() {
         {/* Bridge area to prevent gap issues */}
         <div className="absolute -top-4 left-0 right-0 h-4" />
         
-        <div className="container mx-auto px-6 py-12">
+        <div className="container-wide py-12">
           <div className="grid grid-cols-4 gap-12">
             {/* Left Column - Categories */}
             <div>
@@ -485,7 +485,7 @@ export default function Header() {
         {/* Bridge area to prevent gap issues */}
         <div className="absolute -top-4 left-0 right-0 h-4" />
         
-        <div className="container mx-auto px-6 py-12">
+        <div className="container-wide py-12">
           <div className="grid grid-cols-4 gap-12">
             {/* Left Column - Categories */}
             <div>

@@ -3,6 +3,8 @@ import Hero from '@/Components/Hero';
 import FeaturedProducts from '@/Components/FeaturedProducts';
 import FeaturedCategories from '@/Components/FeaturedCategories';
 import Newsletter from '@/Components/Newsletter';
+import { Link } from '@inertiajs/react';
+import { formatPrice } from '@/utils/formatters';
 
 export default function Main() {
   // Sample data - replace with real data from props
@@ -41,42 +43,75 @@ export default function Main() {
     },
   ];
 
-  const trendingProducts = [
+  // Top row - Colorful shirts
+  const trendingShirts = [
     {
       id: 1,
-      name: 'Essential Hoodie',
-      price: 8999,
-      originalPrice: 12000,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=800&fit=crop',
-      hoverImage: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&h=800&fit=crop',
-      badge: 'Sale',
-      badgeVariant: 'accent' as const,
-      category: 'Hoodies',
+      name: 'Green Polo Shirt',
+      price: 4200,
+      image: 'https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=600&h=600&fit=crop',
+      category: 'SHIRTS FROM ALCHEMY',
+      backgroundColor: '#2d5f4a',
     },
     {
       id: 2,
-      name: 'Graphic Tee',
-      price: 4499,
-      image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=800&fit=crop',
-      badge: 'New',
-      badgeVariant: 'electric' as const,
-      category: 'T-Shirts',
+      name: 'Orange Polo Shirt',
+      price: 4200,
+      image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=600&fit=crop',
+      category: 'SHIRTS FROM ALCHEMY',
+      backgroundColor: '#d8613c',
     },
     {
       id: 3,
-      name: 'Premium Hoodie',
-      price: 13999,
-      image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&h=800&fit=crop',
-      badge: 'Premium',
-      badgeVariant: 'brand' as const,
-      category: 'Hoodies',
+      name: 'Beige Polo Shirt',
+      price: 4200,
+      image: 'https://images.unsplash.com/photo-1598032895397-d9372670b208?w=600&h=600&fit=crop',
+      category: 'SHIRTS FROM ALCHEMY',
+      backgroundColor: '#a8917a',
     },
     {
       id: 4,
-      name: 'Classic Tee',
-      price: 3799,
-      image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop',
-      category: 'T-Shirts',
+      name: 'Blue Polo Shirt',
+      price: 4200,
+      image: 'https://images.unsplash.com/photo-1607345366928-199ea26cfe3e?w=600&h=600&fit=crop',
+      category: 'SHIRTS FROM ALCHEMY',
+      backgroundColor: '#2e4d7b',
+    },
+  ];
+
+  // Bottom row - Artistic hoodies
+  const trendingHoodies = [
+    {
+      id: 5,
+      name: 'Eagle Print Hoodie',
+      price: 8999,
+      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=600&fit=crop',
+      category: 'HOODIES FROM SERPENTS & ANGELS',
+      backgroundColor: '#000000',
+    },
+    {
+      id: 6,
+      name: 'Snake Print Hoodie',
+      price: 8999,
+      image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&h=600&fit=crop',
+      category: 'HOODIES FROM SERPENTS & ANGELS',
+      backgroundColor: '#1a1a1a',
+    },
+    {
+      id: 7,
+      name: 'Sunset Print Hoodie',
+      price: 8999,
+      image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&h=600&fit=crop',
+      category: 'HOODIES FROM SERPENTS & ANGELS',
+      backgroundColor: '#d8734a',
+    },
+    {
+      id: 8,
+      name: 'Dragon Print Hoodie',
+      price: 8999,
+      image: 'https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?w=600&h=600&fit=crop',
+      category: 'HOODIES FROM SERPENTS & ANGELS',
+      backgroundColor: '#d89630',
     },
   ];
 
@@ -112,13 +147,71 @@ export default function Main() {
       {/* Featured Categories */}
       <FeaturedCategories categories={categories} />
 
-      {/* More Featured Products */}
-      <FeaturedProducts
-        title="Trending Now"
-        subtitle="What everyone's wearing this season"
-        products={trendingProducts.slice().reverse()}
-        viewAllLink="/trending"
-      />
+      {/* Trending Now - Custom 2-row layout */}
+      <section className="py-12">
+        <div className="container-wide">
+          {/* Header */}
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <h2 className="font-display font-bold text-2xl mb-1">Trending Now</h2>
+              <p className="text-xs text-neutral-500">What everyone's wearing this season</p>
+            </div>
+            <Link href="/trending" className="text-[11px] font-semibold uppercase tracking-wider border border-neutral-900 rounded-full px-5 py-2 hover:bg-neutral-900 hover:text-white transition-colors">
+              View All
+            </Link>
+          </div>
+
+          {/* Top Row - Shirts */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 mb-4">
+            {trendingShirts.map((product) => (
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+                className="group block"
+              >
+                <div 
+                  className="aspect-square overflow-hidden mb-2"
+                  style={{ backgroundColor: product.backgroundColor }}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <p className="text-[9px] font-semibold text-neutral-600 uppercase tracking-wider">
+                  {product.category}
+                </p>
+              </Link>
+            ))}
+          </div>
+
+          {/* Bottom Row - Hoodies */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1">
+            {trendingHoodies.map((product) => (
+              <Link
+                key={product.id}
+                href={`/products/${product.id}`}
+                className="group block"
+              >
+                <div 
+                  className="aspect-square overflow-hidden mb-2"
+                  style={{ backgroundColor: product.backgroundColor }}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
+                <p className="text-[9px] font-semibold text-neutral-600 uppercase tracking-wider">
+                  {product.category}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Newsletter */}
       <Newsletter />
