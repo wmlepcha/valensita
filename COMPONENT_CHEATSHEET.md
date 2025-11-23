@@ -516,10 +516,8 @@ npm install
 # 2. Run dev server
 npm run dev
 
-# 3. View examples
+# 3. View example
 # - resources/js/Pages/Main.tsx
-# - resources/js/Pages/ProductExample.tsx
-# - resources/js/Pages/ShopExample.tsx
 ```
 
 ---

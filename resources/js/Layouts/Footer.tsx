@@ -9,7 +9,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2">
             <img 
-              src="/storage/images/valensita-full.png" 
+              src="/storage/images/valensita-header-logo.png" 
               alt="VALENSITA" 
               className="h-10 w-auto mb-6"
             />

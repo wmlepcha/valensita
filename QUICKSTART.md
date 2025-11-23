@@ -21,23 +21,13 @@ npm run dev
 
 Visit your Laravel app to see the new design!
 
-### 3. Test the Examples
+### 3. Test the Example
 
-The design system includes three example pages:
+The design system includes a homepage example:
 
 **Homepage** (`Main.tsx`)
 - Full luxury streetwear homepage
 - Hero, products, categories, newsletter
-
-**Product Page** (`ProductExample.tsx`)  
-- Complete product detail view
-- Image gallery, size/color selection
-- Features and sizing guide
-
-**Shop Page** (`ShopExample.tsx`)
-- Product catalog with filters
-- Sidebar filters, sort options
-- Responsive grid
 
 ---
 
@@ -245,8 +235,6 @@ Light:     #fafafa  (neutral-50)
 
 Start by exploring:
 - `resources/js/Pages/Main.tsx` - Homepage
-- `resources/js/Pages/ProductExample.tsx` - Product page
-- `resources/js/Pages/ShopExample.tsx` - Shop page
 
 Happy coding! ✨
 

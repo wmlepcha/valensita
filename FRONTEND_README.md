@@ -69,8 +69,6 @@ resources/js/
 │   └── Footer.tsx            # Site footer
 └── Pages/
     ├── Main.tsx              # Homepage
-    ├── ProductExample.tsx    # Product detail page example
-    └── ShopExample.tsx       # Shop/catalog page example
 ```
 
 ---
@@ -317,26 +315,13 @@ colors: {
 
 ---
 
-## 📸 Example Pages
+## 📸 Example Page
 
 ### Homepage (`Main.tsx`)
 - Hero section with CTA buttons
 - Featured products grid
 - Category cards
 - Newsletter signup
-
-### Product Page (`ProductExample.tsx`)
-- Image gallery with thumbnails
-- Size and color selection
-- Quantity controls
-- Features, sizing guide, care instructions
-- Related products
-
-### Shop Page (`ShopExample.tsx`)
-- Sidebar filters (category, price, size, color)
-- Sort dropdown
-- Product grid with pagination
-- Mobile-responsive filters
 
 ---
 

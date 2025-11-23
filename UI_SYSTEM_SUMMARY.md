@@ -38,8 +38,6 @@ A complete, production-ready design system for a luxury streetwear ecommerce pla
 
 ### 6. Example Pages
 - ✅ **Main.tsx** - Complete homepage with all sections
-- ✅ **ProductExample.tsx** - Product detail page with specs
-- ✅ **ShopExample.tsx** - Product catalog with filters
 
 ### 7. Utilities
 - ✅ **formatters.ts** - Helper functions (price, date, text formatting)
@@ -112,8 +110,6 @@ resources/
     │   └── index.ts               # Layout exports
     ├── Pages/
     │   ├── Main.tsx               # Homepage example
-    │   ├── ProductExample.tsx     # Product page example
-    │   └── ShopExample.tsx        # Shop page example
     ├── utils/
     │   └── formatters.ts          # Helper functions
     └── app.tsx                    # App entry point
@@ -140,8 +136,6 @@ npm run dev
 
 ### 2. View Examples
 - Homepage: `Main.tsx`
-- Product: `ProductExample.tsx`
-- Shop: `ShopExample.tsx`
 
 ### 3. Use Components
 ```tsx

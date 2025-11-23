@@ -36,10 +36,8 @@ Your complete luxury streetwear design system is ready to use!
 - `Newsletter.tsx` - Email subscription section
 - `PromoBar.tsx` - Top announcement bar
 
-### ✅ Example Pages (3 files)
+### ✅ Example Pages (1 file)
 - `Main.tsx` - Complete homepage with all sections
-- `ProductExample.tsx` - Product detail page with specs
-- `ShopExample.tsx` - Shop page with filters and sorting
 
 ### ✅ Utilities (3 files)
 - `formatters.ts` - Helper functions (price, dates, text)
@@ -70,8 +68,6 @@ npm run dev
 
 ### 3. Explore Examples
 - **Homepage**: `resources/js/Pages/Main.tsx`
-- **Product Page**: `resources/js/Pages/ProductExample.tsx`
-- **Shop Page**: `resources/js/Pages/ShopExample.tsx`
 
 ### 4. Read Documentation
 Start with any of these based on your role:
@@ -310,7 +306,7 @@ Everything is set up and ready to use:
 
 ✅ Design system configured  
 ✅ Components built and tested  
-✅ Example pages created  
+✅ Homepage example created  
 ✅ Documentation complete  
 ✅ No linting errors  
 
@@ -324,7 +320,7 @@ npm run dev
 npm run build
 ```
 
-**Explore the example pages and start creating your luxury streetwear ecommerce experience!**
+**Explore the homepage example and start creating your luxury streetwear ecommerce experience!**
 
 ---
 
@@ -342,7 +338,7 @@ npm run build
 
 You now have:
 - ✅ 20+ production-ready components
-- ✅ 3 complete example pages
+- ✅ 1 complete example page
 - ✅ Full design system documentation
 - ✅ Luxury streetwear aesthetic
 - ✅ Unified spacing and typography

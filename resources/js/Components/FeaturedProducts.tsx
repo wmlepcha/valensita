@@ -14,6 +14,7 @@ interface Product {
   badge?: string;
   badgeVariant?: 'default' | 'brand' | 'accent' | 'outline' | 'electric';
   category?: string;
+  slug?: string;
 }
 
 interface FeaturedProductsProps {
@@ -92,7 +93,7 @@ export default function FeaturedProducts({
             {products.map((product) => (
               <Link
                 key={product.id}
-                href={`/products/${product.id}`}
+                href={`/product/${product.slug || product.id}`}
                 className="group block"
               >
                 <div className="relative aspect-[3/4] bg-neutral-100 rounded-lg overflow-hidden mb-3">
@@ -137,7 +138,7 @@ export default function FeaturedProducts({
             {products.map((product) => (
               <Link
                 key={product.id}
-                href={`/products/${product.id}`}
+                href={`/product/${product.slug || product.id}`}
                 className="group block"
               >
                 <div className="relative h-[360px] sm:h-[420px] lg:h-[480px] overflow-hidden bg-neutral-900">

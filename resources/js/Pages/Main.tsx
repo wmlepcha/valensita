@@ -16,6 +16,7 @@ export default function Main() {
       image: '/storage/images/valensita-card-print.png',
       badge: 'Look 01',
       category: 'Drop 07',
+      slug: 'valensita-card-print',
     },
     {
       id: 2,
@@ -24,6 +25,7 @@ export default function Main() {
       image: '/storage/images/valensita-devil-print.png',
       badge: 'Look 02',
       category: 'Drop 07',
+      slug: 'valensita-devil-print',
     },
     {
       id: 3,
@@ -32,6 +34,7 @@ export default function Main() {
       image: '/storage/images/valensita-tiger-print.png',
       badge: 'Look 03',
       category: 'Drop 07',
+      slug: 'valensita-tiger-print',
     },
     {
       id: 4,
@@ -40,6 +43,7 @@ export default function Main() {
       image: '/storage/images/valensita-trial-print.png',
       badge: 'Look 04',
       category: 'Drop 07',
+      slug: 'valensita-trial-print',
     },
   ];
 
@@ -52,6 +56,7 @@ export default function Main() {
       image: '/storage/images/back-view-1-valensita.png',
       category: 'SHIRTS FROM ALCHEMY',
       backgroundGradient: 'linear-gradient(135deg, #2d5f4a 0%, #1a3d2e 50%, #0f281f 100%)',
+      slug: 'valensita-devil-print',
     },
     {
       id: 2,
@@ -60,6 +65,7 @@ export default function Main() {
       image: '/storage/images/back-view-2-valensita.png',
       category: 'SHIRTS FROM ALCHEMY',
       backgroundGradient: 'linear-gradient(135deg, #d8613c 0%, #b84a2a 50%, #8b3318 100%)',
+      slug: 'valensita-tiger-print',
     },
     {
       id: 3,
@@ -68,6 +74,7 @@ export default function Main() {
       image: '/storage/images/back-view-3-valensita.png',
       category: 'SHIRTS FROM ALCHEMY',
       backgroundGradient: 'linear-gradient(135deg, #a8917a 0%, #8b7560 50%, #6b5a47 100%)',
+      slug: 'valensita-card-print',
     },
     {
       id: 4,
@@ -76,6 +83,7 @@ export default function Main() {
       image: '/storage/images/back-view-4-valensita.png',
       category: 'SHIRTS FROM ALCHEMY',
       backgroundGradient: 'linear-gradient(135deg, #2e4d7b 0%, #1e3452 50%, #0f1a29 100%)',
+      slug: 'valensita-devil-print',
     },
   ];
 
@@ -88,6 +96,7 @@ export default function Main() {
       image: '/storage/images/back-view-5-valensita.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
       backgroundGradient: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)',
+      slug: 'valensita-tiger-print',
     },
     {
       id: 6,
@@ -96,6 +105,7 @@ export default function Main() {
       image: '/storage/images/back-view-6-valensita.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
       backgroundGradient: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #404040 100%)',
+      slug: 'valensita-card-print',
     },
     {
       id: 7,
@@ -104,6 +114,7 @@ export default function Main() {
       image: '/storage/images/back-view-7-valensita.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
       backgroundGradient: 'linear-gradient(135deg, #d8734a 0%, #c55a2e 50%, #a84215 100%)',
+      slug: 'valensita-devil-print',
     },
     {
       id: 8,
@@ -112,6 +123,7 @@ export default function Main() {
       image: '/storage/images/back-view-8-valensita.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
       backgroundGradient: 'linear-gradient(135deg, #d89630 0%, #c47a1a 50%, #a05e0f 100%)',
+      slug: 'valensita-tiger-print',
     },
   ];
 
@@ -166,7 +178,7 @@ export default function Main() {
             {trendingShirts.map((product) => (
               <Link
                 key={product.id}
-                href={`/products/${product.id}`}
+                href={`/product/${product.slug}`}
                 className="group block"
               >
                 <div 
@@ -191,7 +203,7 @@ export default function Main() {
             {trendingHoodies.map((product) => (
               <Link
                 key={product.id}
-                href={`/products/${product.id}`}
+                href={`/product/${product.slug}`}
                 className="group block"
               >
                 <div 
