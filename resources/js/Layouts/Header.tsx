@@ -91,9 +91,9 @@ export default function Header() {
     <>
       <header className={headerClasses}>
         <div className="container-wide">
-          <div className="flex items-center justify-between h-16">
+          <div className="relative flex items-center justify-between h-16">
             {/* Left Navigation */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center gap-8 flex-1">
               {/* Hoodies with Dropdown */}
               <div 
                 className="relative"
@@ -149,17 +149,17 @@ export default function Header() {
               </div>
             </nav>
 
-            {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
+            {/* Logo - Absolutely Centered */}
+            <Link href="/" className="absolute left-1/2 transform -translate-x-1/2 flex-shrink-0">
               <img 
-                src="/storage/images/valensita-black.png" 
+                src="/storage/images/valensita-header-logo.png" 
                 alt="VALENSITA" 
                 className="h-6 w-auto hover:opacity-80 transition-opacity"
               />
             </Link>
 
             {/* Right Actions */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 flex-1 justify-end">
               {/* Search Icon */}
               <button className="hidden lg:block hover:opacity-60 transition-opacity">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

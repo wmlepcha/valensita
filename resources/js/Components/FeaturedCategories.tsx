@@ -14,8 +14,7 @@ interface FeaturedCategoriesProps {
 export default function FeaturedCategories({ categories }: FeaturedCategoriesProps) {
   return (
     <section className="w-full">
-      <div className="container-wide">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 w-full">
           {/* Hoodies Banner */}
           <Link
             href="/category/hoodies"
@@ -67,7 +66,6 @@ export default function FeaturedCategories({ categories }: FeaturedCategoriesPro
               </button>
             </div>
           </Link>
-        </div>
       </div>
     </section>
   );

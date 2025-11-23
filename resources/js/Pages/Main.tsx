@@ -49,33 +49,33 @@ export default function Main() {
       id: 1,
       name: 'Green Polo Shirt',
       price: 4200,
-      image: 'https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?w=600&h=600&fit=crop',
+      image: '/storage/images/back-view-1-valensita.png',
       category: 'SHIRTS FROM ALCHEMY',
-      backgroundColor: '#2d5f4a',
+      backgroundGradient: 'linear-gradient(135deg, #2d5f4a 0%, #1a3d2e 50%, #0f281f 100%)',
     },
     {
       id: 2,
       name: 'Orange Polo Shirt',
       price: 4200,
-      image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=600&h=600&fit=crop',
+      image: '/storage/images/back-view-2-valensita.png',
       category: 'SHIRTS FROM ALCHEMY',
-      backgroundColor: '#d8613c',
+      backgroundGradient: 'linear-gradient(135deg, #d8613c 0%, #b84a2a 50%, #8b3318 100%)',
     },
     {
       id: 3,
       name: 'Beige Polo Shirt',
       price: 4200,
-      image: 'https://images.unsplash.com/photo-1598032895397-d9372670b208?w=600&h=600&fit=crop',
+      image: '/storage/images/back-view-3-valensita.png',
       category: 'SHIRTS FROM ALCHEMY',
-      backgroundColor: '#a8917a',
+      backgroundGradient: 'linear-gradient(135deg, #a8917a 0%, #8b7560 50%, #6b5a47 100%)',
     },
     {
       id: 4,
       name: 'Blue Polo Shirt',
       price: 4200,
-      image: 'https://images.unsplash.com/photo-1607345366928-199ea26cfe3e?w=600&h=600&fit=crop',
+      image: '/storage/images/back-view-4-valensita.png',
       category: 'SHIRTS FROM ALCHEMY',
-      backgroundColor: '#2e4d7b',
+      backgroundGradient: 'linear-gradient(135deg, #2e4d7b 0%, #1e3452 50%, #0f1a29 100%)',
     },
   ];
 
@@ -85,33 +85,33 @@ export default function Main() {
       id: 5,
       name: 'Eagle Print Hoodie',
       price: 8999,
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=600&fit=crop',
+      image: '/storage/images/back-view-5-valensita.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundColor: '#000000',
+      backgroundGradient: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)',
     },
     {
       id: 6,
       name: 'Snake Print Hoodie',
       price: 8999,
-      image: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&h=600&fit=crop',
+      image: '/storage/images/back-view-6-valensita.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundColor: '#1a1a1a',
+      backgroundGradient: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #404040 100%)',
     },
     {
       id: 7,
       name: 'Sunset Print Hoodie',
       price: 8999,
-      image: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&h=600&fit=crop',
+      image: '/storage/images/back-view-7-valensita.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundColor: '#d8734a',
+      backgroundGradient: 'linear-gradient(135deg, #d8734a 0%, #c55a2e 50%, #a84215 100%)',
     },
     {
       id: 8,
       name: 'Dragon Print Hoodie',
       price: 8999,
-      image: 'https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?w=600&h=600&fit=crop',
+      image: '/storage/images/back-view-8-valensita.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundColor: '#d89630',
+      backgroundGradient: 'linear-gradient(135deg, #d89630 0%, #c47a1a 50%, #a05e0f 100%)',
     },
   ];
 
@@ -171,7 +171,7 @@ export default function Main() {
               >
                 <div 
                   className="aspect-square overflow-hidden mb-2"
-                  style={{ backgroundColor: product.backgroundColor }}
+                  style={{ background: product.backgroundGradient }}
                 >
                   <img
                     src={product.image}
@@ -196,7 +196,7 @@ export default function Main() {
               >
                 <div 
                   className="aspect-square overflow-hidden mb-2"
-                  style={{ backgroundColor: product.backgroundColor }}
+                  style={{ background: product.backgroundGradient }}
                 >
                   <img
                     src={product.image}
