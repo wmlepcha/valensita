@@ -14,7 +14,7 @@ export default function MainLayout({ children, title = 'VALENSITA' }: MainLayout
   return (
     <>
       <Head title={title} />
-      <div className="min-h-screen flex flex-col bg-gradient-to-br from-neutral-100 to-neutral-200">
+      <div className="min-h-screen flex flex-col bg-gradient-to-br from-neutral-100 to-neutral-200 overflow-x-hidden">
         <Header />
         <main className="flex-grow">
           {children}
