@@ -20,10 +20,10 @@ export default function Button({
 
   const variants = {
     primary: 'bg-neutral-900 text-neutral-50 hover:bg-neutral-800 active:bg-neutral-950',
-    secondary: 'bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700',
+    secondary: 'bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-900 hover:from-neutral-200 hover:to-neutral-300 active:from-neutral-200 active:to-neutral-300',
     outline: 'border-2 border-neutral-900 text-neutral-900 hover:bg-neutral-900 hover:text-neutral-50 active:bg-neutral-950',
     ghost: 'text-neutral-900 hover:bg-neutral-100 active:bg-neutral-200',
-    accent: 'gradient-accent text-white hover:opacity-90 active:opacity-80',
+    accent: 'bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-900 hover:from-neutral-200 hover:to-neutral-300 active:from-neutral-200 active:to-neutral-300',
   };
 
   const sizes = {

@@ -10,12 +10,11 @@
     font-feature-settings: "kern" 1, "liga" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* overflow-x: hidden; */
+    width: 100%;
   }
 
   body {
-    @apply font-sans text-neutral-900 bg-neutral-50;
-    /* overflow-x: hidden; */
+    @apply font-sans text-neutral-900 bg-gradient-to-br from-neutral-100 to-neutral-200;
     width: 100%;
   }
 
@@ -88,20 +87,20 @@
 
   /* Focus ring - luxury brand style */
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 focus:ring-offset-neutral-50;
+    @apply focus:outline-none focus:ring-2 focus:ring-neutral-400 focus:ring-offset-2 focus:ring-offset-neutral-50;
   }
 
   /* Gradient backgrounds */
   .gradient-primary {
-    @apply bg-gradient-to-br from-brand-500 to-brand-700;
+    @apply bg-gradient-to-br from-neutral-100 to-neutral-200;
   }
 
   .gradient-accent {
-    @apply bg-gradient-to-br from-accent-purple to-accent-pink;
+    @apply bg-gradient-to-br from-neutral-100 to-neutral-200;
   }
 
   .gradient-electric {
-    @apply bg-gradient-to-br from-accent-electric to-brand-500;
+    @apply bg-gradient-to-br from-neutral-100 to-neutral-200;
   }
 }
 
@@ -140,5 +139,20 @@
 
   .grid-products-wide {
     @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6;
+  }
+
+  /* Marquee animation */
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-marquee {
+    animation: marquee 40s linear infinite;
+    display: inline-flex;
   }
 }

@@ -79,7 +79,7 @@ export default function ProductCard({
             {category}
           </p>
         )}
-        <h3 className="font-display font-semibold text-lg group-hover:text-brand-600 transition-colors">
+        <h3 className="font-display font-semibold text-lg group-hover:text-neutral-600 transition-colors">
           {name}
         </h3>
         <div className="flex items-center gap-3">

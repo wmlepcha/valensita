@@ -17,10 +17,10 @@ export default function Badge({
 
   const variants = {
     default: 'bg-neutral-900 text-neutral-50',
-    brand: 'bg-brand-500 text-white',
-    accent: 'gradient-accent text-white',
+    brand: 'bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-900',
+    accent: 'bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-900',
     outline: 'border-2 border-neutral-900 text-neutral-900 bg-transparent',
-    electric: 'bg-accent-electric text-neutral-900',
+    electric: 'bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-900',
   };
 
   const sizes = {

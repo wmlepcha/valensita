@@ -7,6 +7,8 @@ export default function Header() {
   const [tshirtsMenuOpen, setTshirtsMenuOpen] = useState(false);
   const [collectionsMenuOpen, setCollectionsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [currentLogo, setCurrentLogo] = useState(0); // 0 for header-logo, 1 for valensita-l
+  const [mounted, setMounted] = useState(false);
   
   // Refs for timeout management
   const hoodiesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -21,6 +23,22 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Set mounted state to prevent flash
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Logo animation effect
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const logoInterval = setInterval(() => {
+      setCurrentLogo((prev) => (prev === 0 ? 1 : 0));
+    }, 4000); // Switch every 4 seconds to allow smooth transition
+
+    return () => clearInterval(logoInterval);
+  }, [mounted]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -149,14 +167,45 @@ export default function Header() {
               </div>
             </nav>
 
-            {/* Logo - Absolutely Centered */}
-            <Link href="/" className="absolute left-1/2 transform -translate-x-1/2 flex-shrink-0">
-              <img 
-                src="/storage/images/valensita-header-logo.png" 
-                alt="VALENSITA" 
-                className="h-6 w-auto hover:opacity-80 transition-opacity"
-              />
-            </Link>
+            {/* Logo - Absolutely Centered with Animation */}
+            <div className="absolute left-1/2 -translate-x-1/2 flex-shrink-0 h-6">
+              <Link href="/" className="relative inline-flex items-center justify-center h-6">
+                {/* Hidden image to set container width - use the wider logo */}
+                <img 
+                  src="/storage/images/valensita-header-logo.png?v=2"
+                  alt="" 
+                  className="h-6 w-auto opacity-0 pointer-events-none"
+                  aria-hidden="true"
+                />
+                {/* Animated logos - both absolutely centered using flexbox centering */}
+                <img 
+                  src="/storage/images/valensita-header-logo.png?v=2"
+                  alt="VALENSITA" 
+                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-auto ${
+                    mounted 
+                      ? currentLogo === 0 
+                        ? 'transition-opacity duration-[1500ms] ease-in-out' 
+                        : 'transition-opacity duration-[500ms] ease-out'
+                      : ''
+                  } ${
+                    currentLogo === 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                />
+                <img 
+                  src="/storage/images/valensita-logo.png?v=2"
+                  alt="VALENSITA" 
+                  className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-auto ${
+                    mounted 
+                      ? currentLogo === 1 
+                        ? 'transition-opacity duration-[1500ms] ease-in-out' 
+                        : 'transition-opacity duration-[500ms] ease-out'
+                      : ''
+                  } ${
+                    currentLogo === 1 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                />
+              </Link>
+            </div>
 
             {/* Right Actions */}
             <div className="flex items-center gap-6 flex-1 justify-end">

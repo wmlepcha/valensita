@@ -10,4 +10,5 @@ Route::get('/', function () {
 
 // Product routes
 Route::get('/shop', [ProductController::class, 'index'])->name('shop');
+Route::get('/trending', [ProductController::class, 'index'])->name('trending');
 Route::get('/product/{slug}', [ProductController::class, 'show'])->name('product.show');

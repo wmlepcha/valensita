@@ -21,7 +21,7 @@ export default function PromoBar({ message, link, dismissible = true }: PromoBar
   );
 
   return (
-    <div className="bg-accent-electric text-neutral-900">
+    <div className="bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-900">
       <div className="container-wide">
         <div className="relative flex items-center justify-center h-10">
           {link ? (

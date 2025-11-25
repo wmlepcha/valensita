@@ -86,9 +86,11 @@ export default function FeaturedProducts({
             )}
           </div>
         )}
+      </div>
 
         {/* Products Grid */}
         {isSimple ? (
+          <div className="container-wide">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((product) => (
               <Link
@@ -104,7 +106,7 @@ export default function FeaturedProducts({
                   />
                   {product.badge && (
                     <div className="absolute top-3 left-3">
-                      <span className="px-3 py-1 bg-brand-500 text-white text-[10px] font-semibold uppercase tracking-wider rounded-full">
+                      <span className="px-3 py-1 bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-900 text-[10px] font-semibold uppercase tracking-wider rounded-full">
                         {product.badge}
                       </span>
                     </div>
@@ -116,7 +118,7 @@ export default function FeaturedProducts({
                       {product.category}
                     </p>
                   )}
-                  <h3 className="text-sm font-medium text-neutral-900 group-hover:text-brand-600 transition-colors">
+                  <h3 className="text-sm font-medium text-neutral-900 group-hover:text-neutral-600 transition-colors">
                     {product.name}
                   </h3>
                   <div className="flex items-center gap-2">
@@ -133,49 +135,63 @@ export default function FeaturedProducts({
               </Link>
             ))}
           </div>
+          </div>
         ) : isEditorial ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
             {products.map((product) => (
               <Link
                 key={product.id}
                 href={`/product/${product.slug || product.id}`}
                 className="group block"
               >
-                <div className="relative h-[360px] sm:h-[420px] lg:h-[480px] overflow-hidden bg-neutral-900">
+                <div className="relative aspect-square overflow-hidden mb-4" style={{ background: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)' }}>
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover object-center scale-110 group-hover:scale-100 transition-transform duration-[1200ms]"
+                    className={`absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-700 ease-in-out ${
+                      product.hoverImage ? 'group-hover:opacity-0' : ''
+                    }`}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/0 to-transparent opacity-70" />
-                  <div className="absolute top-6 left-6 text-[10px] uppercase tracking-[0.35em] text-white/70">
-                    {product.badge ?? 'Latest Drop'}
-                  </div>
-                  <div className="absolute inset-x-0 bottom-0 p-6 flex items-center justify-between text-white">
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold uppercase tracking-[0.25em] text-white/70">
-                        {product.category ?? 'Valensita'}
-                      </p>
-                      <p className="text-sm font-medium uppercase tracking-[0.15em]">
-                        {product.name}
-                      </p>
+                  {product.hoverImage && (
+                    <img
+                      src={product.hoverImage}
+                      alt={product.name}
+                      className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 ease-in-out group-hover:opacity-100"
+                    />
+                  )}
+                  {product.badge && (
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className="px-3 py-1 bg-gradient-to-br from-neutral-100 to-neutral-200 text-neutral-900 text-[10px] font-semibold uppercase tracking-wider rounded-full">
+                        {product.badge}
+                      </span>
                     </div>
-                    <span className="text-xs tracking-[0.2em] text-white/70">
-                      {formatPrice(product.price)}
-                    </span>
-                  </div>
+                  )}
+                </div>
+                <div className="px-4 space-y-1">
+                  {product.category && (
+                    <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
+                      {product.category}
+                    </p>
+                  )}
+                  <p className="text-sm font-medium text-neutral-900">
+                    {product.name}
+                  </p>
+                  <span className="text-sm font-bold text-neutral-900">
+                    {formatPrice(product.price)}
+                  </span>
                 </div>
               </Link>
             ))}
           </div>
         ) : (
+          <div className="container-wide">
           <ProductGrid variant={gridVariant}>
             {products.map((product) => (
               <ProductCard key={product.id} {...product} />
             ))}
           </ProductGrid>
+          </div>
         )}
-      </div>
     </section>
   );
 }

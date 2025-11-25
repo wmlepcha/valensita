@@ -79,7 +79,7 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-[65vh] md:min-h-[55vh] xl:min-h-[65vh] 2xl:min-h-[80vh] bg-gradient-to-br from-neutral-100 to-neutral-200 overflow-hidden flex items-center">
-      <div className="container-wide pt-24 pb-8 md:pt-20 md:pb-10 xl:pt-28 xl:pb-16 2xl:pt-32 2xl:pb-24 w-full">
+      <div className="container-wide pt-24 pb-8 md:pt-20 md:pb-10 xl:pt-28 xl:pb-16 2xl:pt-32 2xl:pb-24">
         <div className="grid md:grid-cols-3 gap-6 md:gap-6 xl:gap-8 2xl:gap-12 items-center">
           {/* Left Content */}
           <div className="flex flex-col justify-between min-h-[380px] md:min-h-[320px] xl:min-h-[400px] 2xl:min-h-[520px]">

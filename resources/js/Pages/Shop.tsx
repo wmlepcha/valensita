@@ -64,7 +64,7 @@ export default function Shop({ products }: ShopProps) {
     <MainLayout>
       <Head title="Shop - VALENSITA" />
 
-      <div className="bg-white min-h-screen">
+      <div className="bg-white min-h-screen pt-20">
         {/* Breadcrumb */}
         <div className="container-wide py-6 border-b border-neutral-200">
           <div className="flex items-center gap-2 text-sm text-neutral-600">
@@ -168,8 +168,7 @@ export default function Shop({ products }: ShopProps) {
                   ))}
                 </div>
               </div>
-              </aside>
-            </div>
+            </aside>
 
             {/* Main Content */}
             <div>
@@ -209,21 +208,21 @@ export default function Shop({ products }: ShopProps) {
                     href={`/product/${product.slug}`}
                     className="group block"
                   >
-                    <div className="relative aspect-[3/4] bg-neutral-50 rounded-lg overflow-hidden mb-4">
+                    <div className="relative aspect-[3/4] bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-lg overflow-hidden mb-4">
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-xs text-neutral-500 uppercase tracking-wider">
+                      <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
                         {product.category}
                       </p>
-                      <h3 className="font-medium text-neutral-900 group-hover:text-neutral-600 transition-colors">
+                      <h3 className="text-sm font-medium text-neutral-900 group-hover:text-neutral-600 transition-colors">
                         {product.name}
                       </h3>
-                      <p className="font-bold text-neutral-900">
+                      <p className="text-sm font-medium text-neutral-900">
                         ₹{product.price.toFixed(2)}
                       </p>
                     </div>

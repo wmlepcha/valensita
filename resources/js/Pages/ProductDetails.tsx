@@ -43,115 +43,128 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     <MainLayout>
       <Head title={`${product.name} - VALENSITA`} />
       
-      <div className="bg-white min-h-screen">
-        <div className="container-wide py-8">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-neutral-600 mb-8">
-            <Link href="/" className="hover:text-neutral-900">Home</Link>
-            <span>/</span>
-            <Link href="/shop" className="hover:text-neutral-900">Shop</Link>
-            <span>/</span>
-            <span className="text-neutral-900">{product.name}</span>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+      <div className="bg-white min-h-screen flex items-center pt-20">
+        <div className="container-wide py-12 lg:py-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             {/* Left Column - Images */}
-            <div className="space-y-4">
+            <div className="flex flex-col-reverse lg:flex-row gap-6 items-start">
+              {/* Thumbnail Images (Vertical on Desktop) */}
+              {product.images.length > 1 && (
+                <div className="flex lg:flex-col gap-4 w-full lg:w-20 flex-shrink-0 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 justify-center lg:justify-start">
+                  {product.images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`relative w-20 aspect-square bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-lg overflow-hidden border transition-all duration-200 flex-shrink-0 ${
+                        selectedImage === index
+                          ? 'border-neutral-900 ring-1 ring-neutral-900'
+                          : 'border-transparent hover:border-neutral-300'
+                      }`}
+                    >
+                      <img
+                        src={image}
+                        alt={`${product.name} view ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Main Image */}
-              <div className="relative aspect-square bg-neutral-50 rounded-lg overflow-hidden">
+              <div className="relative aspect-[4/5] w-full bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-lg overflow-hidden shadow-sm flex-1">
                 <img
                   src={product.images[selectedImage]}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
               </div>
-
-              {/* Thumbnail Images */}
-              <div className="grid grid-cols-4 gap-4">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`relative aspect-square bg-neutral-50 rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImage === index
-                        ? 'border-neutral-900'
-                        : 'border-transparent hover:border-neutral-300'
-                    }`}
-                  >
-                    <img
-                      src={image}
-                      alt={`${product.name} view ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Right Column - Product Info */}
-            <div className="space-y-6">
-              {/* Category */}
-              <div className="text-xs tracking-wider uppercase text-neutral-600">
-                {product.category}
-              </div>
-
-              {/* Product Name */}
-              <h1 className="font-display font-bold text-4xl lg:text-5xl text-neutral-900">
-                {product.name}
-              </h1>
-
-              {/* Price */}
-              <div className="text-3xl font-bold text-neutral-900">
-                ${product.price.toFixed(2)}
-              </div>
-
-              {/* Description */}
-              <p className="text-neutral-700 leading-relaxed">
-                {product.description}
-              </p>
-
-              {/* Color Selection */}
-              <div className="space-y-3">
-                <div className="text-sm font-bold tracking-wider uppercase text-neutral-900">
-                  Select Color
+            <div className="max-w-lg mx-auto w-full space-y-8">
+              {/* Header */}
+              <div className="space-y-4">
+                <div className="text-[10px] font-bold tracking-[0.2em] uppercase text-neutral-500">
+                  {product.category}
                 </div>
-                <div className="flex gap-3">
-                  {product.colors.map((color, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedColor(index)}
-                      className={`w-10 h-10 rounded-full border-2 transition-all ${
-                        selectedColor === index
-                          ? 'border-neutral-900 scale-110'
-                          : 'border-neutral-300 hover:border-neutral-400'
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                      aria-label={color.name}
-                      title={color.name}
-                    />
-                  ))}
+                <h1 className="text-3xl md:text-4xl font-medium text-neutral-900 tracking-tight">
+                  {product.name}
+                </h1>
+                <div className="text-xl font-medium text-neutral-900">
+                  ${product.price.toFixed(2)}
+                </div>
+                <p className="text-sm text-neutral-600 leading-relaxed">
+                  {product.description}
+                </p>
+              </div>
+
+              <div className="h-px bg-neutral-100 w-full" />
+
+              {/* Color Selection & Features */}
+              <div className="flex flex-col lg:flex-row gap-8 justify-between items-start">
+                <div className="space-y-4">
+                  <div className="text-xs font-bold tracking-widest uppercase text-neutral-900">
+                    Color: <span className="text-neutral-500 font-normal normal-case ml-2">{product.colors[selectedColor].name}</span>
+                  </div>
+                  <div className="flex gap-3">
+                    {product.colors.map((color, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedColor(index)}
+                        className={`w-8 h-8 rounded-full border transition-all duration-200 ${
+                          selectedColor === index
+                            ? 'ring-2 ring-neutral-900 ring-offset-2'
+                            : 'border-neutral-200 hover:border-neutral-400'
+                        }`}
+                        style={{ backgroundColor: color.hex }}
+                        aria-label={color.name}
+                        title={color.name}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Features List */}
+                <div className="space-y-2 text-[10px] text-neutral-500 min-w-[140px]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-1 h-1 rounded-full bg-neutral-400" />
+                    100% Premium Cotton
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1 h-1 rounded-full bg-neutral-400" />
+                    Made in India
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1 h-1 rounded-full bg-neutral-400" />
+                    Free Shipping {'>'} $100
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-1 h-1 rounded-full bg-neutral-400" />
+                    Easy Returns
+                  </div>
                 </div>
               </div>
 
               {/* Size Selection */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-bold tracking-wider uppercase text-neutral-900">
-                    Select Size
+                  <div className="text-xs font-bold tracking-widest uppercase text-neutral-900">
+                    Size
                   </div>
-                  <Link href="/size-guide" className="text-xs text-neutral-600 hover:text-neutral-900 underline">
+                  <Link href="/size-guide" className="text-xs text-neutral-500 hover:text-neutral-900 underline decoration-neutral-300 underline-offset-4">
                     Size Guide
                   </Link>
                 </div>
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                <div className="grid grid-cols-6 gap-2">
                   {product.sizes.map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`py-3 text-sm font-medium border rounded transition-colors ${
+                      className={`h-10 text-xs font-medium border rounded transition-all duration-200 ${
                         selectedSize === size
                           ? 'bg-neutral-900 text-white border-neutral-900'
-                          : 'bg-white text-neutral-900 border-neutral-300 hover:border-neutral-900'
+                          : 'bg-white text-neutral-900 border-neutral-200 hover:border-neutral-900'
                       }`}
                     >
                       {size}
@@ -161,26 +174,22 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
               </div>
 
               {/* Quantity & Add to Cart */}
-              <div className="space-y-4 pt-4">
-                <div className="flex gap-4">
+              <div className="pt-6 space-y-4">
+                <div className="flex gap-4 h-12">
                   {/* Quantity Selector */}
-                  <div className="flex items-center border border-neutral-300 rounded">
+                  <div className="flex items-center border border-neutral-200 rounded w-32">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-4 py-3 hover:bg-neutral-50 transition-colors"
+                      className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
-                      </svg>
+                      -
                     </button>
-                    <span className="px-6 py-3 font-medium">{quantity}</span>
+                    <span className="flex-1 text-center text-sm font-medium">{quantity}</span>
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="px-4 py-3 hover:bg-neutral-50 transition-colors"
+                      className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
+                      +
                     </button>
                   </div>
 
@@ -188,91 +197,22 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                   <button
                     onClick={handleAddToCart}
                     disabled={!product.inStock}
-                    className="flex-1 bg-neutral-900 text-white py-3 px-8 rounded font-medium tracking-wider uppercase text-sm hover:bg-neutral-800 transition-colors disabled:bg-neutral-300 disabled:cursor-not-allowed"
+                    className="flex-1 bg-neutral-900 text-white rounded font-bold tracking-widest uppercase text-xs hover:bg-neutral-800 transition-all disabled:bg-neutral-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                   >
                     {product.inStock ? 'Add to Cart' : 'Out of Stock'}
                   </button>
                 </div>
 
                 {/* Wishlist Button */}
-                <button className="w-full border border-neutral-900 text-neutral-900 py-3 px-8 rounded font-medium tracking-wider uppercase text-sm hover:bg-neutral-900 hover:text-white transition-colors">
+                <button className="w-full h-12 border border-neutral-200 text-neutral-900 rounded font-bold tracking-widest uppercase text-xs hover:border-neutral-900 transition-colors">
                   Add to Wishlist
                 </button>
               </div>
 
-              {/* Product Features */}
-              <div className="space-y-3 pt-6 border-t border-neutral-200">
-                <div className="flex items-center gap-3 text-sm text-neutral-700">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>100% Premium Cotton</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-neutral-700">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Made in India</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-neutral-700">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Free Shipping on orders over $100</span>
-                </div>
-              </div>
             </div>
-          </div>
-
-          {/* Product Details Accordion */}
-          <div className="mt-16 max-w-4xl">
-            <details className="border-t border-neutral-200 py-6 group">
-              <summary className="flex items-center justify-between cursor-pointer font-bold tracking-wider uppercase text-sm text-neutral-900">
-                <span>Product Details</span>
-                <svg className="w-5 h-5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div className="mt-4 text-neutral-700 leading-relaxed space-y-2">
-                <p>Premium quality {product.category.toLowerCase()} made with 100% cotton fabric.</p>
-                <p>Features include reinforced stitching, pre-shrunk fabric, and vibrant color retention.</p>
-                <p>Perfect for everyday wear with a comfortable, relaxed fit.</p>
-              </div>
-            </details>
-
-            <details className="border-t border-neutral-200 py-6 group">
-              <summary className="flex items-center justify-between cursor-pointer font-bold tracking-wider uppercase text-sm text-neutral-900">
-                <span>Size & Fit</span>
-                <svg className="w-5 h-5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div className="mt-4 text-neutral-700 leading-relaxed">
-                <p>Model is 6'0" and wearing size M.</p>
-                <p className="mt-2">For a relaxed fit, order your regular size. For a fitted look, consider sizing down.</p>
-              </div>
-            </details>
-
-            <details className="border-t border-b border-neutral-200 py-6 group">
-              <summary className="flex items-center justify-between cursor-pointer font-bold tracking-wider uppercase text-sm text-neutral-900">
-                <span>Care Instructions</span>
-                <svg className="w-5 h-5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </summary>
-              <div className="mt-4 text-neutral-700 leading-relaxed">
-                <ul className="space-y-1 list-disc list-inside">
-                  <li>Machine wash cold with like colors</li>
-                  <li>Do not bleach</li>
-                  <li>Tumble dry low</li>
-                  <li>Iron on low heat if needed</li>
-                </ul>
-              </div>
-            </details>
           </div>
         </div>
       </div>
     </MainLayout>
   );
 }
-

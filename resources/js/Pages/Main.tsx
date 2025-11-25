@@ -13,7 +13,8 @@ export default function Main() {
       id: 1,
       name: 'Bamboozled T-Shirt',
       price: 5200,
-      image: '/storage/images/valensita-card-print.png',
+      image: '/storage/images/card-print-back.png',
+      hoverImage: '/storage/images/card-print-front.png',
       badge: 'Look 01',
       category: 'Drop 07',
       slug: 'valensita-card-print',
@@ -22,7 +23,8 @@ export default function Main() {
       id: 2,
       name: 'Bark T-Shirt',
       price: 5800,
-      image: '/storage/images/valensita-devil-print.png',
+      image: '/storage/images/devil-print-back.png',
+      hoverImage: '/storage/images/devil-print-front.png',
       badge: 'Look 02',
       category: 'Drop 07',
       slug: 'valensita-devil-print',
@@ -31,7 +33,8 @@ export default function Main() {
       id: 3,
       name: 'Black Stomp T-Shirt',
       price: 5800,
-      image: '/storage/images/valensita-tiger-print.png',
+      image: '/storage/images/tiger-print-back.png',
+      hoverImage: '/storage/images/tiger-print-front.png',
       badge: 'Look 03',
       category: 'Drop 07',
       slug: 'valensita-tiger-print',
@@ -40,7 +43,8 @@ export default function Main() {
       id: 4,
       name: 'Grey Night Wing T-Shirt',
       price: 5800,
-      image: '/storage/images/valensita-trial-print.png',
+      image: '/storage/images/flower-print-back.png',
+      hoverImage: '/storage/images/flower-print-front.png',
       badge: 'Look 04',
       category: 'Drop 07',
       slug: 'valensita-trial-print',
@@ -53,36 +57,40 @@ export default function Main() {
       id: 1,
       name: 'Green Polo Shirt',
       price: 4200,
-      image: '/storage/images/back-view-1-valensita.png',
+      image: '/storage/images/card-print-back.png',
+      hoverImage: '/storage/images/card-print-front.png',
       category: 'SHIRTS FROM ALCHEMY',
-      backgroundGradient: 'linear-gradient(135deg, #2d5f4a 0%, #1a3d2e 50%, #0f281f 100%)',
+      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
       slug: 'valensita-devil-print',
     },
     {
       id: 2,
       name: 'Orange Polo Shirt',
       price: 4200,
-      image: '/storage/images/back-view-2-valensita.png',
+      image: '/storage/images/devil-print-back.png',
+      hoverImage: '/storage/images/devil-print-front.png',
       category: 'SHIRTS FROM ALCHEMY',
-      backgroundGradient: 'linear-gradient(135deg, #d8613c 0%, #b84a2a 50%, #8b3318 100%)',
+      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
       slug: 'valensita-tiger-print',
     },
     {
       id: 3,
       name: 'Beige Polo Shirt',
       price: 4200,
-      image: '/storage/images/back-view-3-valensita.png',
+      image: '/storage/images/tiger-print-back.png',
+      hoverImage: '/storage/images/tiger-print-front.png',
       category: 'SHIRTS FROM ALCHEMY',
-      backgroundGradient: 'linear-gradient(135deg, #a8917a 0%, #8b7560 50%, #6b5a47 100%)',
+      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
       slug: 'valensita-card-print',
     },
     {
       id: 4,
       name: 'Blue Polo Shirt',
       price: 4200,
-      image: '/storage/images/back-view-4-valensita.png',
+      image: '/storage/images/flower-print-back.png',
+      hoverImage: '/storage/images/flower-print-front.png',
       category: 'SHIRTS FROM ALCHEMY',
-      backgroundGradient: 'linear-gradient(135deg, #2e4d7b 0%, #1e3452 50%, #0f1a29 100%)',
+      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
       slug: 'valensita-devil-print',
     },
   ];
@@ -93,36 +101,40 @@ export default function Main() {
       id: 5,
       name: 'Eagle Print Hoodie',
       price: 8999,
-      image: '/storage/images/back-view-5-valensita.png',
+      image: '/storage/images/neon-print-back.png',
+      hoverImage: '/storage/images/neon-print-front.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundGradient: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2d2d2d 100%)',
+      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
       slug: 'valensita-tiger-print',
     },
     {
       id: 6,
       name: 'Snake Print Hoodie',
       price: 8999,
-      image: '/storage/images/back-view-6-valensita.png',
+      image: '/storage/images/snake-print-back.png',
+      hoverImage: '/storage/images/snake-print-front.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundGradient: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #404040 100%)',
+      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
       slug: 'valensita-card-print',
     },
     {
       id: 7,
       name: 'Sunset Print Hoodie',
       price: 8999,
-      image: '/storage/images/back-view-7-valensita.png',
+      image: '/storage/images/roses-print-back.png',
+      hoverImage: '/storage/images/roses-print-front.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundGradient: 'linear-gradient(135deg, #d8734a 0%, #c55a2e 50%, #a84215 100%)',
+      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
       slug: 'valensita-devil-print',
     },
     {
       id: 8,
       name: 'Dragon Print Hoodie',
       price: 8999,
-      image: '/storage/images/back-view-8-valensita.png',
+      image: '/storage/images/italy-print-back.png',
+      hoverImage: '/storage/images/italy-print-front.png',
       category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundGradient: 'linear-gradient(135deg, #d89630 0%, #c47a1a 50%, #a05e0f 100%)',
+      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
       slug: 'valensita-tiger-print',
     },
   ];
@@ -172,56 +184,74 @@ export default function Main() {
               View All
             </Link>
           </div>
+        </div>
 
-          {/* Top Row - Shirts */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 mb-4">
-            {trendingShirts.map((product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.slug}`}
-                className="group block"
+        {/* Top Row - Shirts */}
+        <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-0 mb-4">
+          {trendingShirts.map((product) => (
+            <Link
+              key={product.id}
+              href={`/product/${product.slug}`}
+              className="group block"
+            >
+              <div 
+                className="aspect-square overflow-hidden mb-4 relative"
+                style={{ background: product.backgroundGradient }}
               >
-                <div 
-                  className="aspect-square overflow-hidden mb-2"
-                  style={{ background: product.backgroundGradient }}
-                >
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className={`absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-700 ease-in-out ${
+                    product.hoverImage ? 'group-hover:opacity-0' : ''
+                  }`}
+                />
+                {product.hoverImage && (
                   <img
-                    src={product.image}
+                    src={product.hoverImage}
                     alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 ease-in-out group-hover:opacity-100"
                   />
-                </div>
-                <p className="text-[9px] font-semibold text-neutral-600 uppercase tracking-wider">
-                  {product.category}
-                </p>
-              </Link>
-            ))}
-          </div>
+                )}
+              </div>
+              <p className="text-[9px] font-semibold text-neutral-600 uppercase tracking-wider px-4">
+                {product.category}
+              </p>
+            </Link>
+          ))}
+        </div>
 
-          {/* Bottom Row - Hoodies */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-1">
-            {trendingHoodies.map((product) => (
-              <Link
-                key={product.id}
-                href={`/product/${product.slug}`}
-                className="group block"
+        {/* Bottom Row - Hoodies */}
+        <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-0">
+          {trendingHoodies.map((product) => (
+            <Link
+              key={product.id}
+              href={`/product/${product.slug}`}
+              className="group block"
+            >
+              <div 
+                className="aspect-square overflow-hidden mb-4 relative"
+                style={{ background: product.backgroundGradient }}
               >
-                <div 
-                  className="aspect-square overflow-hidden mb-2"
-                  style={{ background: product.backgroundGradient }}
-                >
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className={`absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-700 ease-in-out ${
+                    product.hoverImage ? 'group-hover:opacity-0' : ''
+                  }`}
+                />
+                {product.hoverImage && (
                   <img
-                    src={product.image}
+                    src={product.hoverImage}
                     alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700 ease-in-out group-hover:opacity-100"
                   />
-                </div>
-                <p className="text-[9px] font-semibold text-neutral-600 uppercase tracking-wider">
-                  {product.category}
-                </p>
-              </Link>
-            ))}
-          </div>
+                )}
+              </div>
+              <p className="text-[9px] font-semibold text-neutral-600 uppercase tracking-wider px-4">
+                {product.category}
+              </p>
+            </Link>
+          ))}
         </div>
       </section>
 
