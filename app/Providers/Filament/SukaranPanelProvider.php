@@ -32,7 +32,7 @@ class SukaranPanelProvider extends PanelProvider
             ->brandLogo(asset('storage/images/valensita-logo-white.png'))
             ->brandLogoHeight('2.5rem')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => '#2185D5',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
