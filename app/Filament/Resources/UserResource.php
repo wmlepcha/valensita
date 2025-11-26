@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\UserRole;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
@@ -31,6 +32,16 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->unique(ignoreRecord: true),
+                Forms\Components\Select::make('role')
+                    ->label('Role')
+                    ->options([
+                        UserRole::ADMIN->value => UserRole::ADMIN->label(),
+                        UserRole::MANAGER->value => UserRole::MANAGER->label(),
+                        UserRole::CUSTOMER->value => UserRole::CUSTOMER->label(),
+                    ])
+                    ->required()
+                    ->default(UserRole::CUSTOMER->value)
+                    ->native(false),
                 Forms\Components\DateTimePicker::make('email_verified_at'),
                 Forms\Components\TextInput::make('password')
                     ->password()
@@ -45,12 +56,35 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('role')
+                    ->badge()
+                    ->color(fn (UserRole $state): string => match ($state) {
+                        UserRole::ADMIN => 'danger',
+                        UserRole::MANAGER => 'warning',
+                        UserRole::CUSTOMER => 'success',
+                    })
+                    ->formatStateUsing(fn (UserRole $state): string => $state->label())
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('last_login_at')
+                    ->label('Last Login')
+                    ->dateTime()
+                    ->sortable()
+                    ->placeholder('Never')
+                    ->since()
+                    ->tooltip(fn ($record) => $record->last_login_at ? $record->last_login_at->format('M d, Y H:i:s') : null),
+                Tables\Columns\TextColumn::make('last_login_ip')
+                    ->label('Login IP')
+                    ->placeholder('—')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -61,7 +95,13 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('role')
+                    ->options([
+                        UserRole::ADMIN->value => UserRole::ADMIN->label(),
+                        UserRole::MANAGER->value => UserRole::MANAGER->label(),
+                        UserRole::CUSTOMER->value => UserRole::CUSTOMER->label(),
+                    ])
+                    ->native(false),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

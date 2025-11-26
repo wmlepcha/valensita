@@ -50,6 +50,7 @@ class SukaranPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\TrackLastLogin::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
