@@ -16,6 +16,7 @@ class Product extends Model
         'category',
         'sku',
         'in_stock',
+        'quantity',
         'is_active',
         'order',
     ];
@@ -24,6 +25,7 @@ class Product extends Model
         'price' => 'decimal:2',
         'original_price' => 'decimal:2',
         'in_stock' => 'boolean',
+        'quantity' => 'integer',
         'is_active' => 'boolean',
         'order' => 'integer',
     ];
@@ -82,5 +84,32 @@ class Product extends Model
     public function scopeOrdered($query)
     {
         return $query->orderBy('order');
+    }
+
+    /**
+     * Scope to get only products in stock (quantity > 0).
+     */
+    public function scopeInStock($query)
+    {
+        return $query->where('quantity', '>', 0)->where('in_stock', true);
+    }
+
+    /**
+     * Check if product is out of stock.
+     */
+    public function isOutOfStock(): bool
+    {
+        return $this->quantity <= 0 || !$this->in_stock;
+    }
+
+    /**
+     * Get stock status text.
+     */
+    public function getStockStatusAttribute(): string
+    {
+        if ($this->isOutOfStock()) {
+            return 'OUT OF STOCK';
+        }
+        return 'IN STOCK';
     }
 }

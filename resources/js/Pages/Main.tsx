@@ -47,13 +47,21 @@ interface MainProps {
     backgroundGradient: string;
     slug: string;
   }>;
+  categorySections?: Array<{
+    id: number;
+    name: string;
+    image: string;
+    link: string;
+    buttonText?: string;
+  }>;
 }
 
 export default function Main({ 
   heroProducts = [],
   newArrivals = [],
   trendingShirts = [],
-  trendingHoodies = []
+  trendingHoodies = [],
+  categorySections = []
 }: MainProps) {
   // Fallback data if no products from database
   const newArrivalProducts = newArrivals.length > 0 ? newArrivals : [
@@ -99,108 +107,13 @@ export default function Main({
     },
   ];
 
-  // Top row - Colorful shirts (use props or fallback)
-  const trendingShirtsData = trendingShirts.length > 0 ? trendingShirts : [
-    {
-      id: 1,
-      name: 'Green Polo Shirt',
-      price: 4200,
-      image: '/storage/images/card-print-back.png',
-      hoverImage: '/storage/images/card-print-front.png',
-      category: 'SHIRTS FROM ALCHEMY',
-      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-      slug: 'valensita-devil-print',
-    },
-    {
-      id: 2,
-      name: 'Orange Polo Shirt',
-      price: 4200,
-      image: '/storage/images/devil-print-back.png',
-      hoverImage: '/storage/images/devil-print-front.png',
-      category: 'SHIRTS FROM ALCHEMY',
-      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-      slug: 'valensita-tiger-print',
-    },
-    {
-      id: 3,
-      name: 'Beige Polo Shirt',
-      price: 4200,
-      image: '/storage/images/tiger-print-back.png',
-      hoverImage: '/storage/images/tiger-print-front.png',
-      category: 'SHIRTS FROM ALCHEMY',
-      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-      slug: 'valensita-card-print',
-    },
-    {
-      id: 4,
-      name: 'Blue Polo Shirt',
-      price: 4200,
-      image: '/storage/images/flower-print-back.png',
-      hoverImage: '/storage/images/flower-print-front.png',
-      category: 'SHIRTS FROM ALCHEMY',
-      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-      slug: 'valensita-devil-print',
-    },
-  ];
+  // Use dynamic trending items from database
+  // Only show first 4 items per row (as per requirement)
+  const trendingShirtsData = trendingShirts.slice(0, 4);
+  const trendingHoodiesData = trendingHoodies.slice(0, 4);
 
-  // Bottom row - Artistic hoodies (use props or fallback)
-  const trendingHoodiesData = trendingHoodies.length > 0 ? trendingHoodies : [
-    {
-      id: 5,
-      name: 'Eagle Print Hoodie',
-      price: 8999,
-      image: '/storage/images/neon-print-back.png',
-      hoverImage: '/storage/images/neon-print-front.png',
-      category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-      slug: 'valensita-tiger-print',
-    },
-    {
-      id: 6,
-      name: 'Snake Print Hoodie',
-      price: 8999,
-      image: '/storage/images/snake-print-back.png',
-      hoverImage: '/storage/images/snake-print-front.png',
-      category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-      slug: 'valensita-card-print',
-    },
-    {
-      id: 7,
-      name: 'Sunset Print Hoodie',
-      price: 8999,
-      image: '/storage/images/roses-print-back.png',
-      hoverImage: '/storage/images/roses-print-front.png',
-      category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-      slug: 'valensita-devil-print',
-    },
-    {
-      id: 8,
-      name: 'Dragon Print Hoodie',
-      price: 8999,
-      image: '/storage/images/italy-print-back.png',
-      hoverImage: '/storage/images/italy-print-front.png',
-      category: 'HOODIES FROM SERPENTS & ANGELS',
-      backgroundGradient: 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-      slug: 'valensita-tiger-print',
-    },
-  ];
-
-  const categories = [
-    {
-      name: 'Hoodies',
-      image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=600&fit=crop',
-      link: '/category/hoodies',
-      description: 'Cozy essentials',
-    },
-    {
-      name: 'T-Shirts',
-      image: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=600&fit=crop',
-      link: '/category/tshirts',
-      description: 'Everyday style',
-    },
-  ];
+  // Use category sections from database, or fallback to empty array
+  const categories = categorySections.length > 0 ? categorySections : [];
 
   return (
     <MainLayout title="Home - VALENSITA">
@@ -235,6 +148,7 @@ export default function Main({
         </div>
 
         {/* Top Row - Shirts */}
+        {trendingShirtsData.length > 0 && (
         <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-0 mb-4">
           {trendingShirtsData.map((product) => (
             <Link
@@ -267,8 +181,10 @@ export default function Main({
             </Link>
           ))}
         </div>
+        )}
 
         {/* Bottom Row - Hoodies */}
+        {trendingHoodiesData.length > 0 && (
         <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-0">
           {trendingHoodiesData.map((product) => (
             <Link
@@ -301,6 +217,7 @@ export default function Main({
             </Link>
           ))}
         </div>
+        )}
       </section>
 
       {/* Newsletter */}

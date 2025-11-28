@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\HeroResource\Pages;
-use App\Models\HeroItem;
+use App\Filament\Resources\CategorySectionResource\Pages;
+use App\Filament\Resources\CategorySectionResource\RelationManagers;
+use App\Models\CategorySection;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,17 +13,17 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class HeroResource extends Resource
+class CategorySectionResource extends Resource
 {
-    protected static ?string $model = HeroItem::class;
+    protected static ?string $model = CategorySection::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
-
-    protected static ?string $navigationLabel = 'Hero Section';
-
-    protected static ?string $modelLabel = 'Hero Item';
-
-    protected static ?string $pluralModelLabel = 'Hero Items';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    
+    protected static ?string $navigationLabel = 'Category Sections';
+    
+    protected static ?string $modelLabel = 'Category Section';
+    
+    protected static ?string $pluralModelLabel = 'Category Sections';
 
     public static function form(Form $form): Form
     {
@@ -34,76 +35,42 @@ class HeroResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->label('Title')
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
-                                if ($operation !== 'create') {
-                                    return;
-                                }
-                                $set('slug', \Illuminate\Support\Str::slug($state));
-                            }),
-                        Forms\Components\TextInput::make('slug')
+                            ->placeholder('e.g., SHOP HOODIES, SHOP OVERSIZED T-SHIRTS')
+                            ->helperText('Main heading displayed on the banner'),
+                        Forms\Components\TextInput::make('link')
                             ->required()
                             ->maxLength(255)
-                            ->unique(ignoreRecord: true)
-                            ->label('URL Slug')
-                            ->helperText('Auto-generated from title, or customize it'),
-                        Forms\Components\TextInput::make('price')
-                            ->required()
-                            ->numeric()
-                            ->prefix('₹')
-                            ->label('Price'),
+                            ->label('Link URL')
+                            ->placeholder('/category/hoodies')
+                            ->helperText('Where the banner links to when clicked'),
+                        Forms\Components\TextInput::make('button_text')
+                            ->maxLength(255)
+                            ->default('Explore')
+                            ->label('Button Text')
+                            ->helperText('Text on the button (default: Explore)'),
                     ])
                     ->columns(2),
                 
                 Forms\Components\Section::make('Image')
                     ->schema([
                         Forms\Components\FileUpload::make('image_url')
-                            ->label('Hero Image')
+                            ->label('Banner Image')
+                            ->required()
                             ->image()
-                            ->directory('hero-images')
+                            ->directory('category-sections-images')
                             ->disk('public')
                             ->visibility('public')
                             ->imageEditor()
                             ->imageEditorAspectRatios([
                                 null,
+                                '5:4',
                                 '16:9',
                                 '4:3',
                                 '1:1',
                             ])
                             ->maxSize(10240) // 10MB
-                            ->helperText('Main image for hero banner')
+                            ->helperText('Main banner image for this category section')
                             ->columnSpanFull(),
-                    ]),
-                
-                Forms\Components\Section::make('Product Details')
-                    ->schema([
-                        Forms\Components\TextInput::make('lining')
-                            ->maxLength(255)
-                            ->label('Lining')
-                            ->placeholder('e.g., 100% Cotton')
-                            ->helperText('Displayed as "Lining" in hero banner'),
-                        Forms\Components\TextInput::make('material')
-                            ->maxLength(255)
-                            ->label('Material')
-                            ->placeholder('e.g., Size Medium')
-                            ->helperText('Displayed as "Material" in hero banner'),
-                        Forms\Components\TextInput::make('height')
-                            ->maxLength(255)
-                            ->label('Height')
-                            ->placeholder('e.g., 5.11/180 cm')
-                            ->helperText('Displayed as "Height" in hero banner'),
-                    ])
-                    ->columns(3),
-                
-                Forms\Components\Section::make('Product Link (Optional)')
-                    ->schema([
-                        Forms\Components\Select::make('product_id')
-                            ->label('Link to Product')
-                            ->relationship('product', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->nullable()
-                            ->helperText('Optionally link to an actual product for inventory management'),
                     ]),
                 
                 Forms\Components\Section::make('Settings')
@@ -153,16 +120,12 @@ class HeroResource extends Resource
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('slug')
+                Tables\Columns\TextColumn::make('link')
+                    ->label('Link')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->money('INR')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('product.name')
-                    ->label('Linked Product')
-                    ->searchable()
-                    ->placeholder('No product linked')
-                    ->default('—'),
+                Tables\Columns\TextColumn::make('button_text')
+                    ->label('Button Text')
+                    ->default('Explore'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('order')
@@ -194,16 +157,16 @@ class HeroResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // Hero items are self-contained, no relation managers needed
+            //
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHeroItems::route('/'),
-            'create' => Pages\CreateHeroItem::route('/create'),
-            'edit' => Pages\EditHeroItem::route('/{record}/edit'),
+            'index' => Pages\ListCategorySections::route('/'),
+            'create' => Pages\CreateCategorySection::route('/create'),
+            'edit' => Pages\EditCategorySection::route('/{record}/edit'),
         ];
     }
 }

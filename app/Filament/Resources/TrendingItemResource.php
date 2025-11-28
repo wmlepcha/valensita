@@ -2,8 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\HeroResource\Pages;
-use App\Models\HeroItem;
+use App\Filament\Resources\TrendingItemResource\Pages;
+use App\Filament\Resources\TrendingItemResource\RelationManagers;
+use App\Models\TrendingItem;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -12,17 +13,17 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class HeroResource extends Resource
+class TrendingItemResource extends Resource
 {
-    protected static ?string $model = HeroItem::class;
+    protected static ?string $model = TrendingItem::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
-
-    protected static ?string $navigationLabel = 'Hero Section';
-
-    protected static ?string $modelLabel = 'Hero Item';
-
-    protected static ?string $pluralModelLabel = 'Hero Items';
+    protected static ?string $navigationIcon = 'heroicon-o-star';
+    
+    protected static ?string $navigationLabel = 'Trending Now';
+    
+    protected static ?string $modelLabel = 'Trending Item';
+    
+    protected static ?string $pluralModelLabel = 'Trending Items';
 
     public static function form(Form $form): Form
     {
@@ -34,64 +35,80 @@ class HeroResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->label('Title')
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
-                                if ($operation !== 'create') {
-                                    return;
-                                }
-                                $set('slug', \Illuminate\Support\Str::slug($state));
-                            }),
+                            ->helperText('Product name or title'),
                         Forms\Components\TextInput::make('slug')
                             ->required()
                             ->maxLength(255)
-                            ->unique(ignoreRecord: true)
-                            ->label('URL Slug')
-                            ->helperText('Auto-generated from title, or customize it'),
-                        Forms\Components\TextInput::make('price')
+                            ->label('Slug/Link')
+                            ->placeholder('/product/product-slug')
+                            ->helperText('URL slug or link for this item'),
+                        Forms\Components\TextInput::make('category_label')
                             ->required()
-                            ->numeric()
-                            ->prefix('₹')
-                            ->label('Price'),
+                            ->maxLength(255)
+                            ->label('Category Label')
+                            ->placeholder('e.g., T-SHIRTS, HOODIES')
+                            ->helperText('Category text displayed below the image'),
                     ])
                     ->columns(2),
                 
-                Forms\Components\Section::make('Image')
+                Forms\Components\Section::make('Images')
                     ->schema([
                         Forms\Components\FileUpload::make('image_url')
-                            ->label('Hero Image')
+                            ->label('Main Image')
+                            ->required()
                             ->image()
-                            ->directory('hero-images')
+                            ->directory('trending-items-images')
                             ->disk('public')
                             ->visibility('public')
                             ->imageEditor()
                             ->imageEditorAspectRatios([
                                 null,
-                                '16:9',
-                                '4:3',
                                 '1:1',
+                                '4:3',
+                                '16:9',
                             ])
                             ->maxSize(10240) // 10MB
-                            ->helperText('Main image for hero banner')
+                            ->helperText('Main product image')
+                            ->columnSpanFull(),
+                        Forms\Components\FileUpload::make('hover_image_url')
+                            ->label('Hover Image (Optional)')
+                            ->image()
+                            ->directory('trending-items-images')
+                            ->disk('public')
+                            ->visibility('public')
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([
+                                null,
+                                '1:1',
+                                '4:3',
+                                '16:9',
+                            ])
+                            ->maxSize(10240) // 10MB
+                            ->helperText('Image shown on hover (optional)')
                             ->columnSpanFull(),
                     ]),
                 
-                Forms\Components\Section::make('Product Details')
+                Forms\Components\Section::make('Display Settings')
                     ->schema([
-                        Forms\Components\TextInput::make('lining')
+                        Forms\Components\Select::make('row')
+                            ->label('Row')
+                            ->required()
+                            ->options([
+                                1 => 'Row 1 (Top - T-Shirts)',
+                                2 => 'Row 2 (Bottom - Hoodies)',
+                            ])
+                            ->default(1)
+                            ->helperText('Which row this item appears in'),
+                        Forms\Components\TextInput::make('order')
+                            ->numeric()
+                            ->default(0)
+                            ->label('Order in Row')
+                            ->helperText('Lower numbers appear first (max 4 items per row)'),
+                        Forms\Components\TextInput::make('background_gradient')
                             ->maxLength(255)
-                            ->label('Lining')
-                            ->placeholder('e.g., 100% Cotton')
-                            ->helperText('Displayed as "Lining" in hero banner'),
-                        Forms\Components\TextInput::make('material')
-                            ->maxLength(255)
-                            ->label('Material')
-                            ->placeholder('e.g., Size Medium')
-                            ->helperText('Displayed as "Material" in hero banner'),
-                        Forms\Components\TextInput::make('height')
-                            ->maxLength(255)
-                            ->label('Height')
-                            ->placeholder('e.g., 5.11/180 cm')
-                            ->helperText('Displayed as "Height" in hero banner'),
+                            ->label('Background Gradient (Optional)')
+                            ->placeholder('linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)')
+                            ->helperText('CSS gradient for background (optional)'),
                     ])
                     ->columns(3),
                 
@@ -103,7 +120,7 @@ class HeroResource extends Resource
                             ->searchable()
                             ->preload()
                             ->nullable()
-                            ->helperText('Optionally link to an actual product for inventory management'),
+                            ->helperText('Optionally link to an actual product'),
                     ]),
                 
                 Forms\Components\Section::make('Settings')
@@ -111,13 +128,7 @@ class HeroResource extends Resource
                         Forms\Components\Toggle::make('is_active')
                             ->default(true)
                             ->label('Active'),
-                        Forms\Components\TextInput::make('order')
-                            ->numeric()
-                            ->default(0)
-                            ->label('Display Order')
-                            ->helperText('Lower numbers appear first'),
-                    ])
-                    ->columns(2),
+                    ]),
             ]);
     }
 
@@ -137,37 +148,36 @@ class HeroResource extends Resource
                         
                         $imageUrl = $record->getRawOriginal('image_url');
                         
-                        // If it's already a full URL, return as is
                         if (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://')) {
                             return $imageUrl;
                         }
                         
-                        // If it starts with /storage/, it's an old path - return as URL
                         if (str_starts_with($imageUrl, '/storage/')) {
                             return url($imageUrl);
                         }
                         
-                        // Otherwise, it's a new uploaded file - use disk URL
                         return \Illuminate\Support\Facades\Storage::disk('public')->url($imageUrl);
                     }),
                 Tables\Columns\TextColumn::make('title')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('slug')
+                Tables\Columns\TextColumn::make('category_label')
+                    ->label('Category')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('price')
-                    ->money('INR')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('product.name')
-                    ->label('Linked Product')
-                    ->searchable()
-                    ->placeholder('No product linked')
-                    ->default('—'),
-                Tables\Columns\IconColumn::make('is_active')
-                    ->boolean(),
+                Tables\Columns\TextColumn::make('row')
+                    ->label('Row')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        '1' => 'success',
+                        '2' => 'info',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('order')
+                    ->label('Order')
                     ->numeric()
                     ->sortable(),
+                Tables\Columns\IconColumn::make('is_active')
+                    ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -179,8 +189,16 @@ class HeroResource extends Resource
                     ->placeholder('All')
                     ->trueLabel('Active only')
                     ->falseLabel('Inactive only'),
+                Tables\Filters\SelectFilter::make('row')
+                    ->label('Row')
+                    ->options([
+                        1 => 'Row 1 (Top)',
+                        2 => 'Row 2 (Bottom)',
+                    ]),
             ])
-            ->defaultSort('order')
+            ->modifyQueryUsing(function ($query) {
+                return $query->orderBy('row')->orderBy('order');
+            })
             ->actions([
                 Tables\Actions\EditAction::make(),
             ])
@@ -194,16 +212,16 @@ class HeroResource extends Resource
     public static function getRelations(): array
     {
         return [
-            // Hero items are self-contained, no relation managers needed
+            //
         ];
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHeroItems::route('/'),
-            'create' => Pages\CreateHeroItem::route('/create'),
-            'edit' => Pages\EditHeroItem::route('/{record}/edit'),
+            'index' => Pages\ListTrendingItems::route('/'),
+            'create' => Pages\CreateTrendingItem::route('/create'),
+            'edit' => Pages\EditTrendingItem::route('/{record}/edit'),
         ];
     }
 }

@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HeroItem;
 use App\Models\Product;
-use Illuminate\Http\Request;
+use App\Models\NewArrival;
+use App\Models\CategorySection;
+use App\Models\TrendingItem;
 use Inertia\Inertia;
 
 class HeroController extends Controller
@@ -13,89 +16,102 @@ class HeroController extends Controller
      */
     public function home()
     {
-        // Get featured products for hero banner (first 3 products)
-        $heroProducts = Product::active()
+        // Get hero items for hero banner
+        $heroProducts = HeroItem::active()
             ->ordered()
-            ->with(['images', 'specifications'])
+            ->with('product')
             ->take(3)
             ->get()
-            ->map(function ($product) {
-                $specs = $product->specifications->pluck('value', 'key')->toArray();
+            ->map(function ($heroItem) {
                 return [
-                    'id' => $product->id,
-                    'title' => $product->name,
-                    'price' => '₹' . number_format($product->price, 0),
-                    'image' => $product->images->first()?->image_url ?? '/storage/images/placeholder.jpg',
-                    'lining' => $specs['LINING'] ?? '100% Cotton',
-                    'material' => $specs['MATERIAL'] ?? 'Size Medium',
-                    'height' => $specs['HEIGHT'] ?? '5.11/180 cm',
-                    'slug' => $product->slug,
+                    'id' => $heroItem->id,
+                    'title' => $heroItem->title,
+                    'price' => '₹' . number_format($heroItem->price, 0),
+                    'image' => $heroItem->image_url ?? '/storage/images/placeholder.jpg',
+                    'lining' => $heroItem->lining ?? '100% Cotton',
+                    'material' => $heroItem->material ?? 'Size Medium',
+                    'height' => $heroItem->height ?? '5.11/180 cm',
+                    'slug' => $heroItem->slug,
                 ];
             });
 
-        // Get new arrival products (next 4 products)
-        $newArrivals = Product::active()
+        // Get new arrival products from NewArrival model
+        $newArrivals = NewArrival::active()
             ->ordered()
-            ->with('images')
-            ->skip(3)
+            ->with(['product.images'])
             ->take(4)
             ->get()
-            ->map(function ($product) {
-                $images = $product->images;
+            ->map(function ($newArrival) {
+                $product = $newArrival->product;
+                
+                // Use new_arrival images if available, otherwise fall back to product images
+                $mainImage = $newArrival->getRawOriginal('image_url');
+                if (!$mainImage) {
+                    // If product exists, use its images, otherwise use placeholder
+                    $images = $product?->images ?? collect();
+                    $mainImage = $images->first()?->image_url ?? '/storage/images/placeholder.jpg';
+                } else {
+                    // Format the image URL using the accessor
+                    $mainImage = $newArrival->image_url;
+                }
+                
+                $hoverImage = $newArrival->getRawOriginal('hover_image_url');
+                if (!$hoverImage) {
+                    // If product exists, use its images, otherwise null
+                    $images = $product?->images ?? collect();
+                    $hoverImage = $images->count() > 1 ? $images->get(1)->image_url : null;
+                } else {
+                    // Format the hover image URL using the accessor
+                    $hoverImage = $newArrival->hover_image_url;
+                }
+                
                 return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => (float) $product->price,
-                    'image' => $images->first()?->image_url ?? '/storage/images/placeholder.jpg',
-                    'hoverImage' => $images->count() > 1 ? $images->get(1)->image_url : null,
-                    'badge' => null,
-                    'category' => $product->category ?? 'New Arrivals',
-                    'slug' => $product->slug,
+                    'id' => $product?->id ?? $newArrival->id,
+                    'name' => $product?->name ?? 'New Arrival',
+                    'price' => (float) ($product?->price ?? 0),
+                    'image' => $mainImage,
+                    'hoverImage' => $hoverImage,
+                    'badge' => $newArrival->look_number,
+                    'category' => $newArrival->drop_number ?? $product?->category ?? 'New Arrivals',
+                    'slug' => $product?->slug ?? 'new-arrival-' . $newArrival->id,
                 ];
             });
 
-        // Get trending products (shirts and hoodies)
-        $trendingShirts = Product::active()
-            ->where(function ($query) {
-                $query->where('category', 'T-Shirts')
-                      ->orWhere('category', 'LIKE', '%Shirt%');
-            })
-            ->with('images')
-            ->take(4)
+        // Get trending items (organized by row)
+        $trendingItems = TrendingItem::active()
+            ->ordered()
             ->get()
-            ->map(function ($product) {
-                $images = $product->images;
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => (float) $product->price,
-                    'image' => $images->first()?->image_url ?? '/storage/images/placeholder.jpg',
-                    'hoverImage' => $images->count() > 1 ? $images->get(1)->image_url : null,
-                    'category' => $product->category ?? 'SHIRTS FROM ALCHEMY',
-                    'backgroundGradient' => 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-                    'slug' => $product->slug,
-                ];
+            ->groupBy('row')
+            ->map(function ($items, $row) {
+                return $items->take(4)->map(function ($item) {
+                    return [
+                        'id' => $item->id,
+                        'name' => $item->title,
+                        'price' => 0, // Price not used in trending display, but required by frontend interface
+                        'image' => $item->image_url ?? '/storage/images/placeholder.jpg',
+                        'hoverImage' => $item->hover_image_url,
+                        'category' => $item->category_label,
+                        'backgroundGradient' => $item->background_gradient ?? 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
+                        'slug' => $item->slug,
+                    ];
+                })->values();
             });
+        
+        $trendingShirts = $trendingItems->get(1, collect())->toArray();
+        $trendingHoodies = $trendingItems->get(2, collect())->toArray();
 
-        $trendingHoodies = Product::active()
-            ->where(function ($query) {
-                $query->where('category', 'Hoodies')
-                      ->orWhere('category', 'LIKE', '%Hoodie%');
-            })
-            ->with('images')
-            ->take(4)
+        // Get category sections for featured categories (limit to 2 as per design)
+        $categorySections = CategorySection::active()
+            ->ordered()
+            ->take(2)
             ->get()
-            ->map(function ($product) {
-                $images = $product->images;
+            ->map(function ($section) {
                 return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => (float) $product->price,
-                    'image' => $images->first()?->image_url ?? '/storage/images/placeholder.jpg',
-                    'hoverImage' => $images->count() > 1 ? $images->get(1)->image_url : null,
-                    'category' => $product->category ?? 'HOODIES FROM SERPENTS & ANGELS',
-                    'backgroundGradient' => 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-                    'slug' => $product->slug,
+                    'id' => $section->id,
+                    'name' => $section->title,
+                    'image' => $section->image_url,
+                    'link' => $section->link,
+                    'buttonText' => $section->button_text ?? 'Explore',
                 ];
             });
 
@@ -104,6 +120,7 @@ class HeroController extends Controller
             'newArrivals' => $newArrivals,
             'trendingShirts' => $trendingShirts,
             'trendingHoodies' => $trendingHoodies,
+            'categorySections' => $categorySections,
         ]);
     }
 }
