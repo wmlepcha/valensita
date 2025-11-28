@@ -6,7 +6,7 @@ use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
-class ProductController extends Controller
+class HeroController extends Controller
 {
     /**
      * Display homepage with featured products
@@ -104,95 +104,6 @@ class ProductController extends Controller
             'newArrivals' => $newArrivals,
             'trendingShirts' => $trendingShirts,
             'trendingHoodies' => $trendingHoodies,
-        ]);
-    }
-
-    /**
-     * Display all products
-     */
-    public function index()
-    {
-        $products = Product::active()
-            ->ordered()
-            ->with('images')
-            ->get()
-            ->map(function ($product) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'slug' => $product->slug,
-                    'price' => (float) $product->price,
-                    'image' => $product->images->first()?->image_url ?? '/storage/images/placeholder.jpg',
-                    'category' => $product->category,
-                ];
-            });
-
-        return Inertia::render('Shop', [
-            'products' => $products
-        ]);
-    }
-
-    /**
-     * Display the product details page
-     */
-    public function show($slug)
-    {
-        $product = Product::where('slug', $slug)
-            ->with(['images', 'variants', 'specifications'])
-            ->first();
-
-        if (!$product) {
-            abort(404);
-        }
-
-        // Format colors and sizes from variants
-        $colors = $product->colors()
-            ->get()
-            ->map(function ($variant) {
-                return [
-                    'name' => $variant->name,
-                    'hex' => $variant->value ?? '#000000',
-                ];
-            })
-            ->toArray();
-
-        $sizes = $product->sizes()
-            ->get()
-            ->pluck('name')
-            ->toArray();
-
-        // Format specifications
-        $specifications = $product->specifications()
-            ->get()
-            ->mapWithKeys(function ($spec) {
-                return [$spec->key => $spec->value];
-            })
-            ->toArray();
-
-        // Ensure we have at least one image
-        $images = $product->images->pluck('image_url')->toArray();
-        if (empty($images)) {
-            $images = ['/storage/images/placeholder.jpg'];
-        }
-
-        $formattedProduct = [
-            'id' => $product->id,
-            'name' => $product->name,
-            'slug' => $product->slug,
-            'description' => $product->description ?? '',
-            'price' => (float) $product->price,
-            'originalPrice' => $product->original_price ? (float) $product->original_price : null,
-            'images' => $images,
-            'colors' => $colors,
-            'sizes' => $sizes,
-            'category' => $product->category ?? '',
-            'inStock' => $product->in_stock,
-            'sku' => $product->sku,
-            'specifications' => $specifications,
-        ];
-
-        return Inertia::render('ProductDetails', [
-            'product' => $formattedProduct
         ]);
     }
 }

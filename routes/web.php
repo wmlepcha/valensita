@@ -2,11 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\HeroController;
 use App\Http\Controllers\ProductController;
 
-Route::get('/', function () {
-    return Inertia::render('Main');
-});
+Route::get('/', [HeroController::class, 'home'])->name('home');
 
 // Product routes
 Route::get('/shop', [ProductController::class, 'index'])->name('shop');

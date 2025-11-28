@@ -6,9 +6,57 @@ import Newsletter from '@/Components/Newsletter';
 import { Link } from '@inertiajs/react';
 import { formatPrice } from '@/utils/formatters';
 
-export default function Main() {
-  // Sample data - replace with real data from props
-  const newArrivalProducts = [
+interface MainProps {
+  heroProducts?: Array<{
+    id: number;
+    title: string;
+    price: string;
+    image: string;
+    lining: string;
+    material: string;
+    height: string;
+    slug: string;
+  }>;
+  newArrivals?: Array<{
+    id: number;
+    name: string;
+    price: number;
+    image: string;
+    hoverImage?: string;
+    badge?: string;
+    category?: string;
+    slug: string;
+  }>;
+  trendingShirts?: Array<{
+    id: number;
+    name: string;
+    price: number;
+    image: string;
+    hoverImage?: string;
+    category: string;
+    backgroundGradient: string;
+    slug: string;
+  }>;
+  trendingHoodies?: Array<{
+    id: number;
+    name: string;
+    price: number;
+    image: string;
+    hoverImage?: string;
+    category: string;
+    backgroundGradient: string;
+    slug: string;
+  }>;
+}
+
+export default function Main({ 
+  heroProducts = [],
+  newArrivals = [],
+  trendingShirts = [],
+  trendingHoodies = []
+}: MainProps) {
+  // Fallback data if no products from database
+  const newArrivalProducts = newArrivals.length > 0 ? newArrivals : [
     {
       id: 1,
       name: 'Bamboozled T-Shirt',
@@ -51,8 +99,8 @@ export default function Main() {
     },
   ];
 
-  // Top row - Colorful shirts
-  const trendingShirts = [
+  // Top row - Colorful shirts (use props or fallback)
+  const trendingShirtsData = trendingShirts.length > 0 ? trendingShirts : [
     {
       id: 1,
       name: 'Green Polo Shirt',
@@ -95,8 +143,8 @@ export default function Main() {
     },
   ];
 
-  // Bottom row - Artistic hoodies
-  const trendingHoodies = [
+  // Bottom row - Artistic hoodies (use props or fallback)
+  const trendingHoodiesData = trendingHoodies.length > 0 ? trendingHoodies : [
     {
       id: 5,
       name: 'Eagle Print Hoodie',
@@ -157,7 +205,7 @@ export default function Main() {
   return (
     <MainLayout title="Home - VALENSITA">
       {/* Hero Section */}
-      <Hero />
+      <Hero slides={heroProducts} />
 
       {/* Featured Products */}
       <FeaturedProducts
@@ -188,7 +236,7 @@ export default function Main() {
 
         {/* Top Row - Shirts */}
         <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-0 mb-4">
-          {trendingShirts.map((product) => (
+          {trendingShirtsData.map((product) => (
             <Link
               key={product.id}
               href={`/product/${product.slug}`}
@@ -222,7 +270,7 @@ export default function Main() {
 
         {/* Bottom Row - Hoodies */}
         <div className="w-full grid grid-cols-2 lg:grid-cols-4 gap-0">
-          {trendingHoodies.map((product) => (
+          {trendingHoodiesData.map((product) => (
             <Link
               key={product.id}
               href={`/product/${product.slug}`}

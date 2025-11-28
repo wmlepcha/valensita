@@ -9,9 +9,14 @@ interface Slide {
   lining: string;
   material: string;
   height: string;
+  slug?: string;
 }
 
-const slides: Slide[] = [
+interface HeroProps {
+  slides?: Slide[];
+}
+
+const defaultSlides: Slide[] = [
   {
     id: 1,
     title: 'Borg Bomber Jacket In Black',
@@ -41,11 +46,16 @@ const slides: Slide[] = [
   },
 ];
 
-export default function Hero() {
+export default function Hero({ slides: propSlides }: HeroProps) {
+  // Use provided slides or fall back to defaults
+  const slides = propSlides && propSlides.length > 0 ? propSlides : defaultSlides;
+  
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
+    if (slides.length === 0) return;
+    
     const slideTimer = setTimeout(() => {
       if (!isAnimating) {
         setIsAnimating(true);
@@ -57,7 +67,7 @@ export default function Hero() {
     return () => {
       clearTimeout(slideTimer);
     };
-  }, [currentSlide, isAnimating]);
+  }, [currentSlide, isAnimating, slides.length]);
 
   const handleNext = () => {
     if (!isAnimating) {
@@ -74,6 +84,10 @@ export default function Hero() {
       setTimeout(() => setIsAnimating(false), 600);
     }
   };
+
+  if (slides.length === 0) {
+    return null;
+  }
 
   const slide = slides[currentSlide];
 

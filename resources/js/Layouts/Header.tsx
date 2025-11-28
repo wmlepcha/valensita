@@ -1,19 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
+import { Menu, MenuItem, PageProps } from '@/types';
 
 export default function Header() {
+  const { menus } = usePage<PageProps<{ menus: Menu[] }>>().props;
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [hoodiesMenuOpen, setHoodiesMenuOpen] = useState(false);
-  const [tshirtsMenuOpen, setTshirtsMenuOpen] = useState(false);
-  const [collectionsMenuOpen, setCollectionsMenuOpen] = useState(false);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [currentLogo, setCurrentLogo] = useState(0); // 0 for header-logo, 1 for valensita-l
   const [mounted, setMounted] = useState(false);
   
-  // Refs for timeout management
-  const hoodiesTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const tshirtsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const collectionsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  // Refs for timeout management - dynamic based on menus
+  const menuTimeoutRefs = useRef<Record<number, NodeJS.Timeout | null>>({});
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,58 +41,32 @@ export default function Header() {
   // Cleanup timeouts on unmount
   useEffect(() => {
     return () => {
-      if (hoodiesTimeoutRef.current) clearTimeout(hoodiesTimeoutRef.current);
-      if (tshirtsTimeoutRef.current) clearTimeout(tshirtsTimeoutRef.current);
-      if (collectionsTimeoutRef.current) clearTimeout(collectionsTimeoutRef.current);
+      Object.values(menuTimeoutRefs.current).forEach((timeout) => {
+        if (timeout) clearTimeout(timeout);
+      });
     };
   }, []);
 
   // Helper functions for delayed menu close
-  const openHoodiesMenu = () => {
-    if (hoodiesTimeoutRef.current) {
-      clearTimeout(hoodiesTimeoutRef.current);
-      hoodiesTimeoutRef.current = null;
+  const openMenu = (menuId: number) => {
+    if (menuTimeoutRefs.current[menuId]) {
+      clearTimeout(menuTimeoutRefs.current[menuId]!);
+      menuTimeoutRefs.current[menuId] = null;
     }
-    setHoodiesMenuOpen(true);
-    setTshirtsMenuOpen(false); // Close other menus
-    setCollectionsMenuOpen(false);
+    setOpenMenuId(menuId);
+    // Close other menus
+    Object.keys(menuTimeoutRefs.current).forEach((id) => {
+      if (Number(id) !== menuId && menuTimeoutRefs.current[Number(id)]) {
+        clearTimeout(menuTimeoutRefs.current[Number(id)]!);
+        menuTimeoutRefs.current[Number(id)] = null;
+      }
+    });
   };
 
-  const closeHoodiesMenu = () => {
-    hoodiesTimeoutRef.current = setTimeout(() => {
-      setHoodiesMenuOpen(false);
-    }, 150); // 150ms delay before closing
-  };
-
-  const openTshirtsMenu = () => {
-    if (tshirtsTimeoutRef.current) {
-      clearTimeout(tshirtsTimeoutRef.current);
-      tshirtsTimeoutRef.current = null;
-    }
-    setTshirtsMenuOpen(true);
-    setHoodiesMenuOpen(false); // Close other menus
-    setCollectionsMenuOpen(false);
-  };
-
-  const closeTshirtsMenu = () => {
-    tshirtsTimeoutRef.current = setTimeout(() => {
-      setTshirtsMenuOpen(false);
-    }, 150); // 150ms delay before closing
-  };
-
-  const openCollectionsMenu = () => {
-    if (collectionsTimeoutRef.current) {
-      clearTimeout(collectionsTimeoutRef.current);
-      collectionsTimeoutRef.current = null;
-    }
-    setCollectionsMenuOpen(true);
-    setHoodiesMenuOpen(false); // Close other menus
-    setTshirtsMenuOpen(false);
-  };
-
-  const closeCollectionsMenu = () => {
-    collectionsTimeoutRef.current = setTimeout(() => {
-      setCollectionsMenuOpen(false);
+  const closeMenu = (menuId: number) => {
+    menuTimeoutRefs.current[menuId] = setTimeout(() => {
+      setOpenMenuId(null);
+      menuTimeoutRefs.current[menuId] = null;
     }, 150); // 150ms delay before closing
   };
 
@@ -105,6 +77,9 @@ export default function Header() {
       : 'bg-transparent border-transparent'
   ].join(' ');
 
+  // Filter menus that have items (for mega menu display)
+  const menusWithItems = menus?.filter(menu => menu.items && menu.items.length > 0) || [];
+
   return (
     <>
       <header className={headerClasses}>
@@ -112,59 +87,30 @@ export default function Header() {
           <div className="relative flex items-center justify-between h-16">
             {/* Left Navigation */}
             <nav className="hidden lg:flex items-center gap-8 flex-1">
-              {/* Hoodies with Dropdown */}
-              <div 
-                className="relative"
-                onMouseEnter={openHoodiesMenu}
-                onMouseLeave={closeHoodiesMenu}
-              >
-                <Link
-                  href="/hoodies"
-                  className={`text-xs font-medium tracking-widest uppercase transition-colors ${
-                    hoodiesMenuOpen 
-                      ? 'text-neutral-600' 
-                      : 'text-neutral-900 hover:text-neutral-600'
-                  }`}
-                >
-                  Hoodies
-                </Link>
-              </div>
+              {menus?.map((menu) => {
+                const hasItems = menu.items && menu.items.length > 0;
+                const isOpen = openMenuId === menu.id;
 
-              {/* T-Shirts with Dropdown */}
-              <div 
-                className="relative"
-                onMouseEnter={openTshirtsMenu}
-                onMouseLeave={closeTshirtsMenu}
-              >
-                <Link
-                  href="/tshirts"
-                  className={`text-xs font-medium tracking-widest uppercase transition-colors ${
-                    tshirtsMenuOpen 
-                      ? 'text-neutral-600' 
-                      : 'text-neutral-900 hover:text-neutral-600'
-                  }`}
-                >
-                  T-Shirts
-                </Link>
-              </div>
-
-              {/* Collections with Dropdown */}
-              <div 
-                className="relative"
-                onMouseEnter={openCollectionsMenu}
-                onMouseLeave={closeCollectionsMenu}
-              >
-                <Link
-                  href="/collections"
-                  className={`text-xs font-medium tracking-widest uppercase transition-colors ${
-                    collectionsMenuOpen 
-                      ? 'text-neutral-600' 
-                      : 'text-neutral-900 hover:text-neutral-600'
-                  }`}
-                >
-                  Collections
-                </Link>
-              </div>
+                return (
+                  <div 
+                    key={menu.id}
+                    className="relative"
+                    onMouseEnter={() => hasItems && openMenu(menu.id)}
+                    onMouseLeave={() => hasItems && closeMenu(menu.id)}
+                  >
+                    <Link
+                      href={menu.url || `/${menu.slug}`}
+                      className={`text-xs font-medium tracking-widest uppercase transition-colors ${
+                        isOpen 
+                          ? 'text-neutral-600' 
+                          : 'text-neutral-900 hover:text-neutral-600'
+                      }`}
+                    >
+                      {menu.name}
+                    </Link>
+                  </div>
+                );
+              })}
             </nav>
 
             {/* Logo - Absolutely Centered with Animation */}
@@ -255,71 +201,44 @@ export default function Header() {
           {mobileMenuOpen && (
             <nav className="lg:hidden py-6 border-t border-neutral-200">
               <div className="flex flex-col gap-4">
-                {/* Hoodies Section */}
-                <div>
-                  <Link
-                    href="/hoodies"
-                    className="text-xs font-bold tracking-widest uppercase text-neutral-900 hover:text-neutral-600 py-2 block"
-                  >
-                    Hoodies
-                  </Link>
-                  <div className="ml-4 mt-2 space-y-2">
-                    <Link href="/hoodies/pullover" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Pullover
+                {menus?.map((menu) => (
+                  <div key={menu.id}>
+                    <Link
+                      href={menu.url || `/${menu.slug}`}
+                      className="text-xs font-bold tracking-widest uppercase text-neutral-900 hover:text-neutral-600 py-2 block"
+                    >
+                      {menu.name}
                     </Link>
-                    <Link href="/hoodies/zip-up" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Zip-Up
-                    </Link>
-                    <Link href="/hoodies/oversized" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Oversized
-                    </Link>
+                    {menu.items && menu.items.length > 0 && (
+                      <div className="ml-4 mt-2 space-y-2">
+                        {menu.items.map((item) => (
+                          <div key={item.id}>
+                            <Link 
+                              href={item.url} 
+                              className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block"
+                            >
+                              {item.label}
+                            </Link>
+                            {/* Submenu items in mobile */}
+                            {item.children && item.children.length > 0 && (
+                              <div className="ml-4 mt-1 space-y-1">
+                                {item.children.map((child) => (
+                                  <Link 
+                                    key={child.id}
+                                    href={child.url} 
+                                    className="text-xs tracking-wide uppercase text-neutral-500 hover:text-neutral-700 block"
+                                  >
+                                    {child.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-
-                {/* T-Shirts Section */}
-                <div>
-                  <Link
-                    href="/tshirts"
-                    className="text-xs font-bold tracking-widest uppercase text-neutral-900 hover:text-neutral-600 py-2 block"
-                  >
-                    T-Shirts
-                  </Link>
-                  <div className="ml-4 mt-2 space-y-2">
-                    <Link href="/tshirts/graphic" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Graphic Tees
-                    </Link>
-                    <Link href="/tshirts/plain" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Plain Tees
-                    </Link>
-                    <Link href="/tshirts/oversized" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Oversized
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Collections Section */}
-                <div>
-                  <Link
-                    href="/collections"
-                    className="text-xs font-bold tracking-widest uppercase text-neutral-900 hover:text-neutral-600 py-2 block"
-                  >
-                    Collections
-                  </Link>
-                  <div className="ml-4 mt-2 space-y-2">
-                    <Link href="/collections/new-arrivals" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      New Arrivals
-                    </Link>
-                    <Link href="/collections/bestsellers" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Bestsellers
-                    </Link>
-                    <Link href="/collections/limited-edition" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Limited Edition
-                    </Link>
-                    <Link href="/collections/sale" className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block">
-                      Sale
-                    </Link>
-                  </div>
-                </div>
+                ))}
 
                 <Link
                   href="/account"
@@ -333,296 +252,90 @@ export default function Header() {
         </div>
       </header>
 
-      {/* Full-Width Mega Menu for Hoodies */}
-      <div
-        className={`fixed top-16 left-0 right-0 z-40 bg-white border-b border-neutral-200 transition-all duration-300 ease-out ${
-          hoodiesMenuOpen
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 -translate-y-2 pointer-events-none'
-        }`}
-        onMouseEnter={openHoodiesMenu}
-        onMouseLeave={closeHoodiesMenu}
-        style={{
-          boxShadow: hoodiesMenuOpen ? '0 8px 30px rgba(0, 0, 0, 0.08)' : 'none',
-        }}
-      >
-        {/* Bridge area to prevent gap issues */}
-        <div className="absolute -top-4 left-0 right-0 h-4" />
-        
-        <div className="container-wide py-12">
-          <div className="grid grid-cols-4 gap-12">
-            {/* Left Column - Categories */}
-            <div>
-              <h3 className="text-xs font-bold tracking-widest uppercase text-neutral-900 mb-4">
-                Hoodies
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <Link 
-                    href="/hoodies/pullover" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Pullover
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/hoodies/zip-up" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Zip-Up
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/hoodies/oversized" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Oversized
-                  </Link>
-                </li>
-              </ul>
-            </div>
+      {/* Dynamic Mega Menus */}
+      {menusWithItems.map((menu) => {
+        const isOpen = openMenuId === menu.id;
+        const itemsWithImages = menu.items.filter(item => item.image_url);
+        const itemsWithoutImages = menu.items.filter(item => !item.image_url);
+        const hasImages = itemsWithImages.length > 0;
 
-            {/* Image Columns */}
-            <div className="col-span-3 grid grid-cols-3 gap-6">
-              <Link href="/hoodies/pullover" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=800&fit=crop" 
-                    alt="Pullover Hoodies"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
+        return (
+          <div
+            key={menu.id}
+            className={`fixed top-16 left-0 right-0 z-40 bg-white border-b border-neutral-200 transition-all duration-300 ease-out ${
+              isOpen
+                ? 'opacity-100 translate-y-0 pointer-events-auto'
+                : 'opacity-0 -translate-y-2 pointer-events-none'
+            }`}
+            onMouseEnter={() => openMenu(menu.id)}
+            onMouseLeave={() => closeMenu(menu.id)}
+            style={{
+              boxShadow: isOpen ? '0 8px 30px rgba(0, 0, 0, 0.08)' : 'none',
+            }}
+          >
+            {/* Bridge area to prevent gap issues */}
+            <div className="absolute -top-4 left-0 right-0 h-4" />
+            
+            <div className="container-wide py-12">
+              <div className={`grid ${hasImages ? 'grid-cols-4' : 'grid-cols-1'} gap-12`}>
+                {/* Left Column - Categories with Submenus */}
+                <div>
+                  <h3 className="text-xs font-bold tracking-widest uppercase text-neutral-900 mb-4">
+                    {menu.title || menu.name}
+                  </h3>
+                  <ul className="space-y-3">
+                    {menu.items.map((item) => (
+                      <li key={item.id} className="group/item">
+                        <Link 
+                          href={item.url} 
+                          className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200 block"
+                        >
+                          {item.label}
+                        </Link>
+                        {/* Submenu items */}
+                        {item.children && item.children.length > 0 && (
+                          <ul className="ml-4 mt-2 space-y-2 opacity-0 group-hover/item:opacity-100 transition-opacity duration-200">
+                            {item.children.map((child) => (
+                              <li key={child.id}>
+                                <Link 
+                                  href={child.url} 
+                                  className="text-xs tracking-wide uppercase text-neutral-500 hover:text-neutral-700 transition-colors duration-200 block"
+                                >
+                                  {child.label}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  Pullover
-                </p>
-              </Link>
-              <Link href="/hoodies/zip-up" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=600&h=800&fit=crop" 
-                    alt="Zip-Up Hoodies"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
-                </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  Zip-Up
-                </p>
-              </Link>
-              <Link href="/hoodies/oversized" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&h=800&fit=crop" 
-                    alt="Oversized Hoodies"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
-                </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  Oversized
-                </p>
-              </Link>
+
+                {/* Image Columns - Only show if there are items with images */}
+                {hasImages && (
+                  <div className="col-span-3 grid grid-cols-3 gap-6">
+                    {itemsWithImages.slice(0, 3).map((item) => (
+                      <Link key={item.id} href={item.url} className="group">
+                        <div className="overflow-hidden mb-3">
+                          <img 
+                            src={item.image_url} 
+                            alt={item.image_alt || item.label}
+                            className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
+                          />
+                        </div>
+                        <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
+                          {item.label}
+                        </p>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Full-Width Mega Menu for T-Shirts */}
-      <div
-        className={`fixed top-16 left-0 right-0 z-40 bg-white border-b border-neutral-200 transition-all duration-300 ease-out ${
-          tshirtsMenuOpen
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 -translate-y-2 pointer-events-none'
-        }`}
-        onMouseEnter={openTshirtsMenu}
-        onMouseLeave={closeTshirtsMenu}
-        style={{
-          boxShadow: tshirtsMenuOpen ? '0 8px 30px rgba(0, 0, 0, 0.08)' : 'none',
-        }}
-      >
-        {/* Bridge area to prevent gap issues */}
-        <div className="absolute -top-4 left-0 right-0 h-4" />
-        
-        <div className="container-wide py-12">
-          <div className="grid grid-cols-4 gap-12">
-            {/* Left Column - Categories */}
-            <div>
-              <h3 className="text-xs font-bold tracking-widest uppercase text-neutral-900 mb-4">
-                T-Shirts
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <Link 
-                    href="/tshirts/graphic" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Graphic Tees
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/tshirts/plain" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Plain Tees
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/tshirts/oversized" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Oversized
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Image Columns */}
-            <div className="col-span-3 grid grid-cols-3 gap-6">
-              <Link href="/tshirts/graphic" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=800&fit=crop" 
-                    alt="Graphic Tees"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
-                </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  Graphic Tees
-                </p>
-              </Link>
-              <Link href="/tshirts/plain" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop" 
-                    alt="Plain Tees"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
-                </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  Plain Tees
-                </p>
-              </Link>
-              <Link href="/tshirts/oversized" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=600&h=800&fit=crop" 
-                    alt="Oversized Tees"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
-                </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  Oversized
-                </p>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Full-Width Mega Menu for Collections */}
-      <div
-        className={`fixed top-16 left-0 right-0 z-40 bg-white border-b border-neutral-200 transition-all duration-300 ease-out ${
-          collectionsMenuOpen
-            ? 'opacity-100 translate-y-0 pointer-events-auto'
-            : 'opacity-0 -translate-y-2 pointer-events-none'
-        }`}
-        onMouseEnter={openCollectionsMenu}
-        onMouseLeave={closeCollectionsMenu}
-        style={{
-          boxShadow: collectionsMenuOpen ? '0 8px 30px rgba(0, 0, 0, 0.08)' : 'none',
-        }}
-      >
-        {/* Bridge area to prevent gap issues */}
-        <div className="absolute -top-4 left-0 right-0 h-4" />
-        
-        <div className="container-wide py-12">
-          <div className="grid grid-cols-4 gap-12">
-            {/* Left Column - Categories */}
-            <div>
-              <h3 className="text-xs font-bold tracking-widest uppercase text-neutral-900 mb-4">
-                Collections
-              </h3>
-              <ul className="space-y-3">
-                <li>
-                  <Link 
-                    href="/collections/new-arrivals" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    New Arrivals
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/collections/bestsellers" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Bestsellers
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/collections/limited-edition" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Limited Edition
-                  </Link>
-                </li>
-                <li>
-                  <Link 
-                    href="/collections/sale" 
-                    className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 transition-colors duration-200"
-                  >
-                    Sale
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Image Columns */}
-            <div className="col-span-3 grid grid-cols-3 gap-6">
-              <Link href="/collections/new-arrivals" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=800&fit=crop" 
-                    alt="New Arrivals"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
-                </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  New Arrivals
-                </p>
-              </Link>
-              <Link href="/collections/bestsellers" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=600&h=800&fit=crop" 
-                    alt="Bestsellers"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
-                </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  Bestsellers
-                </p>
-              </Link>
-              <Link href="/collections/limited-edition" className="group">
-                <div className="overflow-hidden mb-3">
-                  <img 
-                    src="https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&h=800&fit=crop" 
-                    alt="Limited Edition"
-                    className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                  />
-                </div>
-                <p className="text-xs tracking-wide uppercase text-neutral-600 group-hover:text-neutral-900 transition-colors duration-200">
-                  Limited Edition
-                </p>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
+        );
+      })}
     </>
   );
 }
-

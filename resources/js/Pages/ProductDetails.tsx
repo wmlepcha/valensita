@@ -8,11 +8,14 @@ interface Product {
   slug: string;
   description: string;
   price: number;
+  originalPrice?: number;
   images: string[];
   colors: { name: string; hex: string; }[];
   sizes: string[];
   category: string;
   inStock: boolean;
+  sku?: string;
+  specifications?: Record<string, string>;
 }
 
 interface ProductDetailsProps {
@@ -25,6 +28,10 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedColor, setSelectedColor] = useState(0);
   const [quantity, setQuantity] = useState(1);
 
+  // Ensure selectedColor is valid
+  const hasColors = product.colors && product.colors.length > 0;
+  const validSelectedColor = hasColors && selectedColor < product.colors.length ? selectedColor : 0;
+
   const handleAddToCart = () => {
     if (!selectedSize) {
       alert('Please select a size');
@@ -34,7 +41,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     console.log({
       product: product.id,
       size: selectedSize,
-      color: product.colors[selectedColor],
+      color: hasColors ? product.colors[validSelectedColor] : null,
       quantity
     });
   };
@@ -73,11 +80,17 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
               {/* Main Image */}
               <div className="relative aspect-[4/5] w-full bg-gradient-to-br from-neutral-100 to-neutral-200 rounded-lg overflow-hidden shadow-sm flex-1">
-                <img
-                  src={product.images[selectedImage]}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
+                {product.images && product.images.length > 0 ? (
+                  <img
+                    src={product.images[selectedImage] || product.images[0]}
+                    alt={product.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-neutral-400">
+                    No image available
+                  </div>
+                )}
               </div>
             </div>
 
@@ -91,9 +104,19 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 <h1 className="text-3xl md:text-4xl font-medium text-neutral-900 tracking-tight">
                   {product.name}
                 </h1>
-                <div className="text-xl font-medium text-neutral-900">
-                  ${product.price.toFixed(2)}
+                <div className="flex items-center gap-3">
+                  <span className="text-xl font-medium text-neutral-900">
+                    ${product.price.toFixed(2)}
+                  </span>
+                  {product.originalPrice && product.originalPrice > product.price && (
+                    <span className="text-lg text-neutral-400 line-through">
+                      ${product.originalPrice.toFixed(2)}
+                    </span>
+                  )}
                 </div>
+                {product.sku && (
+                  <p className="text-xs text-neutral-500">SKU: {product.sku}</p>
+                )}
                 <p className="text-sm text-neutral-600 leading-relaxed">
                   {product.description}
                 </p>
@@ -101,49 +124,43 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
 
               <div className="h-px bg-neutral-100 w-full" />
 
-              {/* Color Selection & Features */}
+              {/* Color Selection & Specifications */}
               <div className="flex flex-col lg:flex-row gap-8 justify-between items-start">
-                <div className="space-y-4">
-                  <div className="text-xs font-bold tracking-widest uppercase text-neutral-900">
-                    Color: <span className="text-neutral-500 font-normal normal-case ml-2">{product.colors[selectedColor].name}</span>
+                {product.colors && product.colors.length > 0 && (
+                  <div className="space-y-4">
+                    <div className="text-xs font-bold tracking-widest uppercase text-neutral-900">
+                      Color: <span className="text-neutral-500 font-normal normal-case ml-2">{product.colors[validSelectedColor]?.name}</span>
+                    </div>
+                    <div className="flex gap-3">
+                      {product.colors.map((color, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setSelectedColor(index)}
+                          className={`w-8 h-8 rounded-full border transition-all duration-200 ${
+                            selectedColor === index
+                              ? 'ring-2 ring-neutral-900 ring-offset-2'
+                              : 'border-neutral-200 hover:border-neutral-400'
+                          }`}
+                          style={{ backgroundColor: color.hex }}
+                          aria-label={color.name}
+                          title={color.name}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex gap-3">
-                    {product.colors.map((color, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedColor(index)}
-                        className={`w-8 h-8 rounded-full border transition-all duration-200 ${
-                          selectedColor === index
-                            ? 'ring-2 ring-neutral-900 ring-offset-2'
-                            : 'border-neutral-200 hover:border-neutral-400'
-                        }`}
-                        style={{ backgroundColor: color.hex }}
-                        aria-label={color.name}
-                        title={color.name}
-                      />
+                )}
+
+                {/* Specifications List */}
+                {product.specifications && Object.keys(product.specifications).length > 0 && (
+                  <div className="space-y-2 text-[10px] text-neutral-500 min-w-[140px]">
+                    {Object.entries(product.specifications).map(([key, value]) => (
+                      <div key={key} className="flex items-center gap-2">
+                        <span className="w-1 h-1 rounded-full bg-neutral-400" />
+                        <span className="font-bold uppercase tracking-wider">{key}:</span> {value}
+                      </div>
                     ))}
                   </div>
-                </div>
-
-                {/* Features List */}
-                <div className="space-y-2 text-[10px] text-neutral-500 min-w-[140px]">
-                  <div className="flex items-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-neutral-400" />
-                    100% Premium Cotton
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-neutral-400" />
-                    Made in India
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-neutral-400" />
-                    Free Shipping {'>'} $100
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="w-1 h-1 rounded-full bg-neutral-400" />
-                    Easy Returns
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Size Selection */}
