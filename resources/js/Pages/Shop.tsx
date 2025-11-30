@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MainLayout from '../Layouts/MainLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 
 interface Product {
   id: number;
@@ -13,12 +13,23 @@ interface Product {
 
 interface ShopProps {
   products: Product[];
+  category?: string;
 }
 
-export default function Shop({ products }: ShopProps) {
+export default function Shop({ products, category: initialCategory }: ShopProps) {
+  const { url } = usePage();
   const [sortBy, setSortBy] = useState('recommended');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory || null);
   const [priceRange, setPriceRange] = useState([0, 10000]);
+
+  // Update selected category when URL parameter changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [url]);
 
   const categories = [
     { name: 'All', value: null },
@@ -36,11 +47,33 @@ export default function Shop({ products }: ShopProps) {
     { label: 'Price: High to Low', value: 'price_desc' },
   ];
 
+  // Map category names to filter values
+  const categoryMap: Record<string, string> = {
+    'hoodies': 'hoodies',
+    'hoodie': 'hoodies',
+    'oversized': 'oversized',
+    'oversized t-shirts': 'oversized',
+    'oversized tshirts': 'oversized',
+    'tshirts': 'tshirts',
+    't-shirts': 'tshirts',
+    't-shirt': 'tshirts',
+  };
+
+  // Normalize category for filtering
+  const normalizeCategory = (category: string): string => {
+    const normalized = category.toLowerCase().trim();
+    return categoryMap[normalized] || normalized;
+  };
+
   // Filter and sort products
   const filteredProducts = products
     .filter((product) => {
-      if (selectedCategory && product.category.toLowerCase() !== selectedCategory) {
-        return false;
+      if (selectedCategory) {
+        const productCategory = normalizeCategory(product.category || '');
+        const selectedCategoryNormalized = normalizeCategory(selectedCategory);
+        if (productCategory !== selectedCategoryNormalized) {
+          return false;
+        }
       }
       if (product.price < priceRange[0] || product.price > priceRange[1]) {
         return false;
@@ -89,7 +122,14 @@ export default function Shop({ products }: ShopProps) {
                   {categories.map((category) => (
                     <button
                       key={category.name}
-                      onClick={() => setSelectedCategory(category.value)}
+                      onClick={() => {
+                        setSelectedCategory(category.value);
+                        // Update URL without page reload
+                        const url = category.value 
+                          ? `/shop?category=${category.value}`
+                          : '/shop';
+                        router.visit(url, { preserveState: true, preserveScroll: true });
+                      }}
                       className={`block w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                         selectedCategory === category.value
                           ? 'bg-neutral-900 text-white'

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProductController extends Controller
@@ -109,7 +110,7 @@ class ProductController extends Controller
     /**
      * Display all products
      */
-    public function index()
+    public function index(Request $request)
     {
         $products = Product::active()
             ->ordered()
@@ -127,7 +128,8 @@ class ProductController extends Controller
             });
 
         return Inertia::render('Shop', [
-            'products' => $products
+            'products' => $products,
+            'category' => $request->query('category'), // Pass category from URL
         ]);
     }
 

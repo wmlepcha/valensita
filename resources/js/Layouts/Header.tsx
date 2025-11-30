@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import { Menu, MenuItem, PageProps } from '@/types';
+import CartDrawer from '@/Components/CartDrawer';
 
 export default function Header() {
   const { menus } = usePage<PageProps<{ menus: Menu[] }>>().props;
@@ -9,6 +10,7 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [currentLogo, setCurrentLogo] = useState(0); // 0 for header-logo, 1 for valensita-l
   const [mounted, setMounted] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   
   // Refs for timeout management - dynamic based on menus
   const menuTimeoutRefs = useRef<Record<number, NodeJS.Timeout | null>>({});
@@ -171,15 +173,21 @@ export default function Header() {
               </Link>
 
               {/* Cart */}
-              <Link
-                href="/cart"
-                className="hover:opacity-60 transition-opacity"
+              <button
+                onClick={() => setCartOpen(true)}
+                className="hover:opacity-60 transition-opacity relative"
                 aria-label="Cart"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-              </Link>
+                {/* Cart Badge - Uncomment when cart items are implemented */}
+                {/* {cartItemCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-neutral-900 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                    {cartItemCount}
+                  </span>
+                )} */}
+              </button>
 
               {/* Mobile Menu Toggle */}
               <button
@@ -336,6 +344,9 @@ export default function Header() {
           </div>
         );
       })}
+
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />
     </>
   );
 }
