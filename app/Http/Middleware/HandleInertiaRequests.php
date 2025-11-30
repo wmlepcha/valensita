@@ -72,6 +72,40 @@ class HandleInertiaRequests extends Middleware
                     })
                     ->toArray();
             },
+            'footer' => function () {
+                $footer = \App\Models\Footer::active()
+                    ->with([
+                        'activeSocialLinks' => function ($query) {
+                            $query->ordered();
+                        },
+                        'activeServiceItems' => function ($query) {
+                            $query->ordered();
+                        }
+                    ])
+                    ->first();
+
+                if (!$footer) {
+                    return null;
+                }
+
+                return [
+                    'brandName' => $footer->brand_name,
+                    'description' => $footer->description,
+                    'logoUrl' => $footer->logo_url,
+                    'socialLinks' => $footer->activeSocialLinks->map(function ($link) {
+                        return [
+                            'platform' => $link->platform,
+                            'url' => $link->url,
+                            'iconName' => $link->icon_name,
+                        ];
+                    })->toArray(),
+                    'serviceItems' => $footer->activeServiceItems->map(function ($item) {
+                        return [
+                            'text' => $item->text,
+                        ];
+                    })->toArray(),
+                ];
+            },
         ];
     }
 }

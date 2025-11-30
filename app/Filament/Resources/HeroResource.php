@@ -19,6 +19,8 @@ class HeroResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
 
     protected static ?string $navigationLabel = 'Hero Section';
+    
+    protected static ?string $navigationGroup = 'Website Management';
 
     protected static ?string $modelLabel = 'Hero Item';
 

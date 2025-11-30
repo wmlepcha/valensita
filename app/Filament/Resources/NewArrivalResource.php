@@ -21,6 +21,8 @@ class NewArrivalResource extends Resource
     
     protected static ?string $navigationLabel = 'New Arrivals';
     
+    protected static ?string $navigationGroup = 'Website Management';
+    
     protected static ?string $modelLabel = 'New Arrival';
     
     protected static ?string $pluralModelLabel = 'New Arrivals';

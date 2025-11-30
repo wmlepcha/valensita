@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\NewArrival;
 use App\Models\CategorySection;
 use App\Models\TrendingItem;
+use App\Models\AboutSection;
 use Inertia\Inertia;
 
 class HeroController extends Controller
@@ -115,12 +116,38 @@ class HeroController extends Controller
                 ];
             });
 
+        // Get about section data
+        $aboutSection = AboutSection::active()
+            ->with(['activeValues' => function ($query) {
+                $query->ordered();
+            }])
+            ->first();
+
+        $aboutData = null;
+        if ($aboutSection) {
+            // Get the formatted background image URL (accessor will handle the path)
+            $backgroundImage = $aboutSection->background_image_url;
+            
+            $aboutData = [
+                'title' => $aboutSection->title,
+                'description' => $aboutSection->description,
+                'backgroundImage' => $backgroundImage,
+                'values' => $aboutSection->activeValues->map(function ($value) {
+                    return [
+                        'iconName' => $value->icon_name,
+                        'label' => $value->label,
+                    ];
+                })->toArray(),
+            ];
+        }
+
         return Inertia::render('Main', [
             'heroProducts' => $heroProducts,
             'newArrivals' => $newArrivals,
             'trendingShirts' => $trendingShirts,
             'trendingHoodies' => $trendingHoodies,
             'categorySections' => $categorySections,
+            'aboutSection' => $aboutData,
         ]);
     }
 }

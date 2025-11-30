@@ -21,6 +21,8 @@ class CategorySectionResource extends Resource
     
     protected static ?string $navigationLabel = 'Category Sections';
     
+    protected static ?string $navigationGroup = 'Website Management';
+    
     protected static ?string $modelLabel = 'Category Section';
     
     protected static ?string $pluralModelLabel = 'Category Sections';

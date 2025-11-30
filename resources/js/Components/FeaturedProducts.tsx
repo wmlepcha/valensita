@@ -47,13 +47,13 @@ export default function FeaturedProducts({
       <div className="container-wide">
         {/* Header */}
         {isEditorial ? (
-          <div className="flex items-start justify-between mb-10 gap-6">
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold tracking-[0.4em] uppercase text-neutral-500">
+          <div className="flex items-start justify-between mb-10 xl:mb-12 2xl:mb-16 gap-6 xl:gap-8 2xl:gap-10">
+            <div className="space-y-2 xl:space-y-3 2xl:space-y-4">
+              <p className="text-[11px] xl:text-xs 2xl:text-sm font-semibold tracking-[0.4em] uppercase text-neutral-500">
                 {title}
               </p>
               {subtitle && (
-                <p className="text-xs text-neutral-400 uppercase tracking-[0.2em]">
+                <p className="text-xs xl:text-sm 2xl:text-base text-neutral-400 uppercase tracking-[0.2em]">
                   {subtitle}
                 </p>
               )}
@@ -61,7 +61,7 @@ export default function FeaturedProducts({
             {viewAllLink && (
               <Link
                 href={viewAllLink}
-                className="text-[11px] tracking-[0.3em] uppercase border border-neutral-900 rounded-full px-6 py-2 text-neutral-900 hover:bg-neutral-900 hover:text-neutral-50 transition-colors"
+                className="text-[11px] xl:text-xs 2xl:text-sm tracking-[0.3em] uppercase border border-neutral-900 rounded-full px-6 py-2 xl:px-8 xl:py-2.5 2xl:px-10 2xl:py-3 text-neutral-900 hover:bg-neutral-900 hover:text-neutral-50 transition-colors"
               >
                 Discover More
               </Link>

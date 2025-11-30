@@ -23,6 +23,24 @@ export interface Menu {
     items: MenuItem[];
 }
 
+export interface FooterSocialLink {
+    platform: string;
+    url: string;
+    iconName?: string | null;
+}
+
+export interface FooterServiceItem {
+    text: string;
+}
+
+export interface Footer {
+    brandName: string;
+    description: string;
+    logoUrl: string;
+    socialLinks: FooterSocialLink[];
+    serviceItems: FooterServiceItem[];
+}
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -30,4 +48,5 @@ export type PageProps<
         user: User;
     };
     menus: Menu[];
+    footer: Footer | null;
 };

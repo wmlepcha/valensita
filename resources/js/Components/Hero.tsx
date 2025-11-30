@@ -96,32 +96,46 @@ export default function Hero({ slides: propSlides }: HeroProps) {
       <div className="container-wide pt-24 pb-8 md:pt-20 md:pb-10 xl:pt-28 xl:pb-16 2xl:pt-32 2xl:pb-24">
         <div className="grid md:grid-cols-3 gap-6 md:gap-6 xl:gap-8 2xl:gap-12 items-center">
           {/* Left Content */}
-          <div className="flex flex-col justify-between min-h-[380px] md:min-h-[320px] xl:min-h-[400px] 2xl:min-h-[520px]">
+          <div className="flex flex-col justify-between min-h-[380px] md:min-h-[320px] xl:min-h-[400px] 2xl:min-h-[600px]">
             <div 
               key={`title-${currentSlide}`}
               className="space-y-2 md:space-y-3 xl:space-y-3 2xl:space-y-4 animate-slide-in-left"
             >
-              <h1 className="font-display font-black text-3xl md:text-2xl xl:text-4xl 2xl:text-6xl tracking-tight leading-tight">
+              <h1 className="font-display font-black text-3xl md:text-2xl xl:text-4xl 2xl:text-7xl tracking-tight leading-tight">
                 {slide.title}
               </h1>
-              <p className="text-3xl md:text-3xl xl:text-4xl 2xl:text-6xl font-light text-neutral-400">
+              <p className="text-3xl md:text-3xl xl:text-4xl 2xl:text-7xl font-light text-neutral-400">
                 {slide.price}
               </p>
+              {/* Additional content for extra large screens */}
+              <div className="hidden 2xl:block mt-6 space-y-2">
+                <p className="text-sm text-neutral-500 font-medium">Premium Quality • Limited Edition</p>
+                <Link 
+                  href={`/product/${slide.slug || 'shop'}`}
+                  className="inline-block text-sm text-neutral-900 underline hover:text-neutral-600 transition-colors"
+                >
+                  View Full Details →
+                </Link>
+              </div>
             </div>
 
             {/* Slide Counter */}
-            <div className="mt-8 md:mt-8">
-              <div className="w-12 h-12 md:w-11 md:h-11 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 border border-neutral-900 rounded-full flex items-center justify-center text-[10px] md:text-[10px] xl:text-[11px] 2xl:text-xs font-semibold">
+            <div className="mt-8 md:mt-8 2xl:mt-12">
+              <div className="w-12 h-12 md:w-11 md:h-11 xl:w-12 xl:h-12 2xl:w-16 2xl:h-16 border-2 2xl:border-[3px] border-neutral-900 rounded-full flex items-center justify-center text-[10px] md:text-[10px] xl:text-[11px] 2xl:text-sm font-semibold">
                 {currentSlide + 1}/{slides.length}
+              </div>
+              {/* Additional info for extra large screens */}
+              <div className="hidden 2xl:block mt-4 text-xs text-neutral-500">
+                <p>Slide {currentSlide + 1} of {slides.length}</p>
               </div>
             </div>
           </div>
 
           {/* Center - Model Image */}
-          <div className="relative flex items-center justify-center min-h-[400px] md:min-h-[360px] xl:min-h-[440px] 2xl:min-h-[540px]">
+          <div className="relative flex items-center justify-center min-h-[400px] md:min-h-[360px] xl:min-h-[440px] 2xl:min-h-[680px]">
             {/* Background Shape */}
             <div 
-              className="w-[280px] h-[280px] md:w-[300px] md:h-[300px] xl:w-[380px] xl:h-[380px] 2xl:w-[520px] 2xl:h-[520px] rounded-full bg-gradient-to-b from-white via-white to-white/70 shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:shadow-[0_25px_60px_rgba(0,0,0,0.14)] xl:shadow-[0_35px_90px_rgba(0,0,0,0.16)] 2xl:shadow-[0_45px_110px_rgba(0,0,0,0.18)] animate-scale-in"
+              className="w-[280px] h-[280px] md:w-[300px] md:h-[300px] xl:w-[380px] xl:h-[380px] 2xl:w-[600px] 2xl:h-[600px] rounded-full bg-gradient-to-b from-white via-white to-white/70 shadow-[0_25px_60px_rgba(0,0,0,0.12)] md:shadow-[0_25px_60px_rgba(0,0,0,0.14)] xl:shadow-[0_35px_90px_rgba(0,0,0,0.16)] 2xl:shadow-[0_50px_120px_rgba(0,0,0,0.20)] animate-scale-in"
             />
 
             {/* Transparent Model */}
@@ -129,25 +143,25 @@ export default function Hero({ slides: propSlides }: HeroProps) {
               key={`image-${currentSlide}`}
               src={slide.image}
               alt={slide.title}
-              className="absolute z-10 w-auto h-[400px] md:h-[400px] xl:h-[480px] 2xl:h-[640px] object-contain"
+              className="absolute z-10 w-auto h-[400px] md:h-[400px] xl:h-[480px] 2xl:h-[720px] object-contain"
             />
 
             {/* Navigation Buttons */}
             <button
               onClick={handlePrev}
               disabled={isAnimating}
-              className="absolute left-4 md:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 bg-white border border-neutral-200 rounded-full shadow-lg flex items-center justify-center hover:bg-neutral-100 transition-colors disabled:opacity-50"
+              className="absolute left-4 md:left-8 lg:left-16 2xl:left-20 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 2xl:w-16 2xl:h-16 bg-white border border-neutral-200 2xl:border-2 rounded-full shadow-lg 2xl:shadow-xl flex items-center justify-center hover:bg-neutral-100 transition-colors disabled:opacity-50"
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6 2xl:w-8 2xl:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <button
               onClick={handleNext}
               disabled={isAnimating}
-              className="absolute right-4 md:right-8 lg:right-16 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 bg-neutral-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-neutral-800 transition-colors disabled:opacity-50"
+              className="absolute right-4 md:right-8 lg:right-16 2xl:right-20 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-11 md:h-11 lg:w-12 lg:h-12 2xl:w-16 2xl:h-16 bg-neutral-900 text-white rounded-full shadow-lg 2xl:shadow-xl flex items-center justify-center hover:bg-neutral-800 transition-colors disabled:opacity-50"
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6 2xl:w-8 2xl:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -156,26 +170,37 @@ export default function Hero({ slides: propSlides }: HeroProps) {
           {/* Right Content - Details */}
           <div 
             key={`details-${currentSlide}`}
-            className="flex flex-col justify-between min-h-[380px] md:min-h-[320px] xl:min-h-[400px] 2xl:min-h-[520px] animate-slide-in-right"
+            className="flex flex-col justify-between min-h-[380px] md:min-h-[320px] xl:min-h-[400px] 2xl:min-h-[600px] animate-slide-in-right"
           >
             {/* Product Details */}
-            <div className="space-y-3 md:space-y-4 xl:space-y-5 2xl:space-y-6">
+            <div className="space-y-3 md:space-y-4 xl:space-y-5 2xl:space-y-8">
               <div>
-                <div className="text-[10px] md:text-[10px] xl:text-[11px] 2xl:text-xs text-neutral-500 uppercase tracking-widest mb-1.5 md:mb-1.5 xl:mb-1.5 2xl:mb-2">Lining</div>
-                <div className="text-xs md:text-xs xl:text-xs 2xl:text-sm font-medium">{slide.lining}</div>
+                <div className="text-[10px] md:text-[10px] xl:text-[11px] 2xl:text-sm text-neutral-500 uppercase tracking-widest mb-1.5 md:mb-1.5 xl:mb-1.5 2xl:mb-3">Lining</div>
+                <div className="text-xs md:text-xs xl:text-xs 2xl:text-base font-medium">{slide.lining}</div>
               </div>
               <div>
-                <div className="text-[10px] md:text-[10px] xl:text-[11px] 2xl:text-xs text-neutral-500 uppercase tracking-widest mb-1.5 md:mb-1.5 xl:mb-1.5 2xl:mb-2">Material</div>
-                <div className="text-xs md:text-xs xl:text-xs 2xl:text-sm font-medium">{slide.material}</div>
+                <div className="text-[10px] md:text-[10px] xl:text-[11px] 2xl:text-sm text-neutral-500 uppercase tracking-widest mb-1.5 md:mb-1.5 xl:mb-1.5 2xl:mb-3">Material</div>
+                <div className="text-xs md:text-xs xl:text-xs 2xl:text-base font-medium">{slide.material}</div>
               </div>
               <div>
-                <div className="text-[10px] md:text-[10px] xl:text-[11px] 2xl:text-xs text-neutral-500 uppercase tracking-widest mb-1.5 md:mb-1.5 xl:mb-1.5 2xl:mb-2">Height</div>
-                <div className="text-xs md:text-xs xl:text-xs 2xl:text-sm font-medium">{slide.height}</div>
+                <div className="text-[10px] md:text-[10px] xl:text-[11px] 2xl:text-sm text-neutral-500 uppercase tracking-widest mb-1.5 md:mb-1.5 xl:mb-1.5 2xl:mb-3">Height</div>
+                <div className="text-xs md:text-xs xl:text-xs 2xl:text-base font-medium">{slide.height}</div>
+              </div>
+              {/* Additional details for extra large screens */}
+              <div className="hidden 2xl:block space-y-3 pt-4 border-t border-neutral-200">
+                <div>
+                  <div className="text-sm text-neutral-500 uppercase tracking-widest mb-3">Care Instructions</div>
+                  <div className="text-base font-medium text-neutral-700">Machine wash cold • Hang dry • Do not bleach</div>
+                </div>
+                <div>
+                  <div className="text-sm text-neutral-500 uppercase tracking-widest mb-3">Shipping</div>
+                  <div className="text-base font-medium text-neutral-700">Free shipping on orders over ₹5,000</div>
+                </div>
               </div>
             </div>
 
             {/* Slide Indicators */}
-            <div className="flex items-center gap-3 md:gap-4">
+            <div className="flex items-center gap-3 md:gap-4 2xl:gap-5">
               {slides.map((_, index) => (
                 <button
                   key={index}
@@ -186,24 +211,38 @@ export default function Hero({ slides: propSlides }: HeroProps) {
                       setTimeout(() => setIsAnimating(false), 800);
                     }
                   }}
-                  className={`h-0.5 rounded-full transition-all ${
+                  className={`h-0.5 2xl:h-1 rounded-full transition-all ${
                     index === currentSlide 
-                      ? 'w-8 md:w-10 bg-neutral-900' 
-                      : 'w-6 md:w-8 bg-neutral-300 hover:bg-neutral-400'
+                      ? 'w-8 md:w-10 2xl:w-16 bg-neutral-900' 
+                      : 'w-6 md:w-8 2xl:w-12 bg-neutral-300 hover:bg-neutral-400'
                   }`}
                 />
               ))}
             </div>
 
             {/* Add to Cart Button */}
-            <Link
-              href="/shop"
-              className="inline-flex items-center justify-center w-12 h-12 md:w-11 md:h-11 xl:w-12 xl:h-12 2xl:w-14 2xl:h-14 bg-neutral-900 text-white rounded-full hover:bg-neutral-800 transition-colors shadow-lg"
-            >
-              <svg className="w-5 h-5 md:w-5 md:h-5 xl:w-5 xl:h-5 2xl:w-6 2xl:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </Link>
+            <div className="flex items-center gap-4 2xl:gap-6">
+              <Link
+                href="/shop"
+                className="inline-flex items-center justify-center w-12 h-12 md:w-11 md:h-11 xl:w-12 xl:h-12 2xl:w-16 2xl:h-16 bg-neutral-900 text-white rounded-full hover:bg-neutral-800 transition-colors shadow-lg 2xl:shadow-xl"
+              >
+                <svg className="w-5 h-5 md:w-5 md:h-5 xl:w-5 xl:h-5 2xl:w-7 2xl:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </Link>
+              {/* Additional CTA for extra large screens */}
+              <div className="hidden 2xl:block">
+                <Link
+                  href={`/product/${slide.slug || 'shop'}`}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-neutral-900 text-neutral-900 rounded-full hover:bg-neutral-900 hover:text-white transition-colors font-semibold text-sm"
+                >
+                  Shop Now
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -272,4 +311,5 @@ export default function Hero({ slides: propSlides }: HeroProps) {
     </section>
   );
 }
+
 

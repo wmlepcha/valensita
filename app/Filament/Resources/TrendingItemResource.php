@@ -21,6 +21,8 @@ class TrendingItemResource extends Resource
     
     protected static ?string $navigationLabel = 'Trending Now';
     
+    protected static ?string $navigationGroup = 'Website Management';
+    
     protected static ?string $modelLabel = 'Trending Item';
     
     protected static ?string $pluralModelLabel = 'Trending Items';
