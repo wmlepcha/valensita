@@ -36,7 +36,7 @@ function SocialIcon({ platform, className }: { platform: string; className?: str
 }
 
 export default function Footer() {
-  const { footer } = usePage<PageProps>().props;
+  const { footer, pageLinks } = usePage<PageProps>().props;
   
   // Fallback values if no footer data
   const brandName = footer?.brandName || 'VALENSITA';
@@ -46,6 +46,29 @@ export default function Footer() {
     { platform: 'instagram', url: 'https://instagram.com' },
     { platform: 'youtube', url: 'https://youtube.com' },
     { platform: 'facebook', url: 'https://facebook.com' },
+  ];
+
+  // Get dynamic page links with fallbacks
+  const supportLinks = pageLinks?.support || [
+    { slug: 'contact', title: 'Contact Us' },
+    { slug: 'shipping', title: 'Shipping Info' },
+    { slug: 'returns', title: 'Returns' },
+    { slug: 'faq', title: 'FAQ' },
+    { slug: 'size-guide', title: 'Size Guide' },
+  ];
+
+  const companyLinks = pageLinks?.company || [
+    { slug: 'about', title: 'About Us' },
+    { slug: 'careers', title: 'Careers' },
+    { slug: 'sustainability', title: 'Sustainability' },
+    { slug: 'press', title: 'Press' },
+    { slug: 'blog', title: 'Blog' },
+  ];
+
+  const policyLinks = pageLinks?.policy || [
+    { slug: 'privacy', title: 'Privacy Policy' },
+    { slug: 'terms', title: 'Terms of Service' },
+    { slug: 'cookies', title: 'Cookie Policy' },
   ];
 
   return (
@@ -114,31 +137,13 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-bold text-lg xl:text-xl 2xl:text-2xl mb-6 xl:mb-8 2xl:mb-10">Support</h4>
             <ul className="space-y-3 xl:space-y-4 2xl:space-y-5">
-              <li>
-                <Link href="/contact" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  Contact Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/shipping" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  Shipping Info
-                </Link>
-              </li>
-              <li>
-                <Link href="/returns" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  Returns
-                </Link>
-              </li>
-              <li>
-                <Link href="/faq" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  FAQ
-                </Link>
-              </li>
-              <li>
-                <Link href="/size-guide" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  Size Guide
-                </Link>
-              </li>
+              {supportLinks.map((link) => (
+                <li key={link.slug}>
+                  <Link href={`/${link.slug}`} className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
+                    {link.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 
@@ -146,31 +151,13 @@ export default function Footer() {
           <div>
             <h4 className="font-display font-bold text-lg xl:text-xl 2xl:text-2xl mb-6 xl:mb-8 2xl:mb-10">Company</h4>
             <ul className="space-y-3 xl:space-y-4 2xl:space-y-5">
-              <li>
-                <Link href="/about" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/careers" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  Careers
-                </Link>
-              </li>
-              <li>
-                <Link href="/sustainability" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  Sustainability
-                </Link>
-              </li>
-              <li>
-                <Link href="/press" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  Press
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog" className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
-                  Blog
-                </Link>
-              </li>
+              {companyLinks.map((link) => (
+                <li key={link.slug}>
+                  <Link href={`/${link.slug}`} className="text-neutral-400 hover:text-neutral-50 transition-colors text-sm xl:text-base 2xl:text-lg">
+                    {link.title}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -184,15 +171,11 @@ export default function Footer() {
               © {new Date().getFullYear()} {brandName}. All rights reserved.
             </p>
             <div className="flex gap-6 xl:gap-8 2xl:gap-10 text-sm xl:text-base 2xl:text-lg">
-              <Link href="/privacy" className="text-neutral-400 hover:text-neutral-50 transition-colors">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-neutral-400 hover:text-neutral-50 transition-colors">
-                Terms of Service
-              </Link>
-              <Link href="/cookies" className="text-neutral-400 hover:text-neutral-50 transition-colors">
-                Cookie Policy
-              </Link>
+              {policyLinks.map((link) => (
+                <Link key={link.slug} href={`/${link.slug}`} className="text-neutral-400 hover:text-neutral-50 transition-colors">
+                  {link.title}
+                </Link>
+              ))}
             </div>
           </div>
         </div>

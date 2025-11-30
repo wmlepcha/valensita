@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Seed menus, hero items, new arrivals, category sections, trending items, about section, and footer
+        // Seed menus, hero items, new arrivals, category sections, trending items, about section, footer, and pages
         $this->call([
             MenuSeeder::class,
             HeroItemSeeder::class,
@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             TrendingItemSeeder::class,
             AboutSectionSeeder::class,
             FooterSeeder::class,
+            PageSeeder::class,
         ]);
     }
 }

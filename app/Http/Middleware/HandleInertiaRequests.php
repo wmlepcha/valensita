@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -105,6 +106,28 @@ class HandleInertiaRequests extends Middleware
                         ];
                     })->toArray(),
                 ];
+            },
+            'pageLinks' => function () {
+                try {
+                    if (!\Schema::hasTable('pages')) {
+                        return [];
+                    }
+                    return \App\Models\Page::active()
+                        ->ordered()
+                        ->get()
+                        ->groupBy('category')
+                        ->map(function ($pages, $category) {
+                            return $pages->map(function ($page) {
+                                return [
+                                    'slug' => $page->slug,
+                                    'title' => $page->title,
+                                ];
+                            })->toArray();
+                        })
+                        ->toArray();
+                } catch (\Exception $e) {
+                    return [];
+                }
             },
         ];
     }

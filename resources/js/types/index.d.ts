@@ -41,6 +41,11 @@ export interface Footer {
     serviceItems: FooterServiceItem[];
 }
 
+export interface PageLink {
+    slug: string;
+    title: string;
+}
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -49,4 +54,9 @@ export type PageProps<
     };
     menus: Menu[];
     footer: Footer | null;
+    pageLinks?: {
+        support?: PageLink[];
+        company?: PageLink[];
+        policy?: PageLink[];
+    };
 };
