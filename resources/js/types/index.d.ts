@@ -54,6 +54,9 @@ export type PageProps<
     };
     menus: Menu[];
     footer: Footer | null;
+    cart: {
+        count: number;
+    };
     pageLinks?: {
         support?: PageLink[];
         company?: PageLink[];

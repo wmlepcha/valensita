@@ -161,6 +161,11 @@ class ProductController extends Controller
             ->get()
             ->pluck('name')
             ->toArray();
+        
+        // If no sizes exist, provide default sizes for clothing items
+        if (empty($sizes) && in_array(strtolower($product->category ?? ''), ['t-shirts', 't-shirt', 'shirts', 'shirt', 'hoodies', 'hoodie'])) {
+            $sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+        }
 
         // Format specifications
         $specifications = $product->specifications()
@@ -176,6 +181,10 @@ class ProductController extends Controller
             $images = ['/storage/images/placeholder.jpg'];
         }
 
+        // Determine if product is in stock (both in_stock flag and quantity > 0)
+        // Use the model's isOutOfStock method and invert it
+        $isInStock = !$product->isOutOfStock();
+
         $formattedProduct = [
             'id' => $product->id,
             'name' => $product->name,
@@ -187,7 +196,7 @@ class ProductController extends Controller
             'colors' => $colors,
             'sizes' => $sizes,
             'category' => $product->category ?? '',
-            'inStock' => $product->in_stock,
+            'inStock' => $isInStock,
             'sku' => $product->sku,
             'specifications' => $specifications,
         ];

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import MainLayout from '../Layouts/MainLayout';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 interface Product {
   id: number;
@@ -32,18 +32,34 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const hasColors = product.colors && product.colors.length > 0;
   const validSelectedColor = hasColors && selectedColor < product.colors.length ? selectedColor : 0;
 
-  const handleAddToCart = () => {
-    if (!selectedSize) {
+  // Debug: Log stock status (remove in production)
+  // console.log('Product stock status:', { inStock: product.inStock, productId: product.id });
+
+  const handleAddToCart = async () => {
+    // Only require size if sizes are available
+    const hasSizes = product.sizes && product.sizes.length > 0;
+    if (hasSizes && !selectedSize) {
       alert('Please select a size');
       return;
     }
-    // TODO: Implement add to cart functionality
-    console.log({
-      product: product.id,
-      size: selectedSize,
-      color: hasColors ? product.colors[validSelectedColor] : null,
-      quantity
-    });
+
+    try {
+      const response = await window.axios.post(route('cart.add'), {
+        product_id: product.id,
+        quantity: quantity,
+        size: selectedSize || null,
+        color: hasColors ? product.colors[validSelectedColor]?.name : null,
+      });
+
+      // Reload page to update cart count in header
+      router.reload({ only: ['cart'] });
+      
+      // Open cart drawer instead of showing alert
+      window.dispatchEvent(new CustomEvent('openCartDrawer'));
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Failed to add item to cart';
+      alert(message);
+    }
   };
 
   return (
@@ -163,67 +179,88 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 )}
               </div>
 
-              {/* Size Selection */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-bold tracking-widest uppercase text-neutral-900">
-                    Size
+              {/* Size Selection - Only show if sizes are available */}
+              {product.sizes && product.sizes.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-xs font-bold tracking-widest uppercase text-neutral-900">
+                      Size
+                    </div>
+                    <Link href="/size-guide" className="text-xs text-neutral-500 hover:text-neutral-900 underline decoration-neutral-300 underline-offset-4">
+                      Size Guide
+                    </Link>
                   </div>
-                  <Link href="/size-guide" className="text-xs text-neutral-500 hover:text-neutral-900 underline decoration-neutral-300 underline-offset-4">
-                    Size Guide
-                  </Link>
+                  <div className="grid grid-cols-6 gap-2">
+                    {product.sizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => setSelectedSize(size)}
+                        className={`h-10 text-xs font-medium border rounded transition-all duration-200 ${
+                          selectedSize === size
+                            ? 'bg-neutral-900 text-white border-neutral-900'
+                            : 'bg-white text-neutral-900 border-neutral-200 hover:border-neutral-900'
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-cols-6 gap-2">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={`h-10 text-xs font-medium border rounded transition-all duration-200 ${
-                        selectedSize === size
-                          ? 'bg-neutral-900 text-white border-neutral-900'
-                          : 'bg-white text-neutral-900 border-neutral-200 hover:border-neutral-900'
-                      }`}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
 
               {/* Quantity & Add to Cart */}
               <div className="pt-6 space-y-4">
-                <div className="flex gap-4 h-12">
-                  {/* Quantity Selector */}
-                  <div className="flex items-center border border-neutral-200 rounded w-32">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900"
-                    >
-                      -
-                    </button>
-                    <span className="flex-1 text-center text-sm font-medium">{quantity}</span>
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900"
-                    >
-                      +
-                    </button>
-                  </div>
+                {product.inStock ? (
+                  <>
+                    <div className="flex gap-4 h-12">
+                      {/* Quantity Selector */}
+                      <div className="flex items-center border border-neutral-200 rounded w-32">
+                        <button
+                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                          className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900"
+                        >
+                          -
+                        </button>
+                        <span className="flex-1 text-center text-sm font-medium">{quantity}</span>
+                        <button
+                          onClick={() => setQuantity(quantity + 1)}
+                          className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900"
+                        >
+                          +
+                        </button>
+                      </div>
 
-                  {/* Add to Cart Button */}
-                  <button
-                    onClick={handleAddToCart}
-                    disabled={!product.inStock}
-                    className="flex-1 bg-neutral-900 text-white rounded font-bold tracking-widest uppercase text-xs hover:bg-neutral-800 transition-all disabled:bg-neutral-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                  >
-                    {product.inStock ? 'Add to Cart' : 'Out of Stock'}
-                  </button>
-                </div>
+                      {/* Add to Cart Button */}
+                      <button
+                        onClick={handleAddToCart}
+                        disabled={product.sizes && product.sizes.length > 0 && !selectedSize}
+                        className="flex-1 bg-neutral-900 text-white rounded font-bold tracking-widest uppercase text-xs hover:bg-neutral-800 transition-all disabled:bg-neutral-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
+                      >
+                        Add to Cart
+                      </button>
+                    </div>
 
-                {/* Wishlist Button */}
-                <button className="w-full h-12 border border-neutral-200 text-neutral-900 rounded font-bold tracking-widest uppercase text-xs hover:border-neutral-900 transition-colors">
-                  Add to Wishlist
-                </button>
+                    {/* Wishlist Button */}
+                    <button className="w-full h-12 border border-neutral-200 text-neutral-900 rounded font-bold tracking-widest uppercase text-xs hover:border-neutral-900 transition-colors">
+                      Add to Wishlist
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* Out of Stock Button */}
+                    <button
+                      disabled
+                      className="w-full h-12 bg-neutral-300 text-neutral-500 rounded font-bold tracking-widest uppercase text-xs cursor-not-allowed shadow-sm"
+                    >
+                      Out of Stock
+                    </button>
+
+                    {/* Wishlist Button - Still available when out of stock */}
+                    <button className="w-full h-12 border border-neutral-200 text-neutral-900 rounded font-bold tracking-widest uppercase text-xs hover:border-neutral-900 transition-colors">
+                      Add to Wishlist
+                    </button>
+                  </>
+                )}
               </div>
 
             </div>

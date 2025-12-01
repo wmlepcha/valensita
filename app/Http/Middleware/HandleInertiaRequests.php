@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Session;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -128,6 +129,18 @@ class HandleInertiaRequests extends Middleware
                 } catch (\Exception $e) {
                     return [];
                 }
+            },
+            'cart' => function () {
+                $cart = Session::get('cart', []);
+                $totalItems = 0;
+
+                foreach ($cart as $item) {
+                    $totalItems += $item['quantity'];
+                }
+
+                return [
+                    'count' => $totalItems,
+                ];
             },
         ];
     }
