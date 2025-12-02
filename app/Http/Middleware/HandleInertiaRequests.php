@@ -133,13 +133,22 @@ class HandleInertiaRequests extends Middleware
             'cart' => function () {
                 $cart = Session::get('cart', []);
                 $totalItems = 0;
+                $cartItems = [];
 
-                foreach ($cart as $item) {
+                foreach ($cart as $key => $item) {
                     $totalItems += $item['quantity'];
+                    $cartItems[] = [
+                        'key' => $key,
+                        'product_id' => $item['product_id'],
+                        'quantity' => $item['quantity'],
+                        'size' => $item['size'] ?? null,
+                        'color' => $item['color'] ?? null,
+                    ];
                 }
 
                 return [
                     'count' => $totalItems,
+                    'items' => $cartItems,
                 ];
             },
         ];

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, usePage, router } from '@inertiajs/react';
 import { Menu, MenuItem, PageProps } from '@/types';
 import CartDrawer from '@/Components/CartDrawer';
 

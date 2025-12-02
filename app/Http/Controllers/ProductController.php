@@ -36,7 +36,7 @@ class ProductController extends Controller
         // Get new arrival products (next 4 products)
         $newArrivals = Product::active()
             ->ordered()
-            ->with('images')
+            ->with(['images', 'categoryRelation'])
             ->skip(3)
             ->take(4)
             ->get()
@@ -49,18 +49,22 @@ class ProductController extends Controller
                     'image' => $images->first()?->image_url ?? '/storage/images/placeholder.jpg',
                     'hoverImage' => $images->count() > 1 ? $images->get(1)->image_url : null,
                     'badge' => null,
-                    'category' => $product->category ?? 'New Arrivals',
+                    'category' => $product->categoryRelation?->name ?? $product->category ?? 'New Arrivals',
                     'slug' => $product->slug,
                 ];
             });
 
         // Get trending products (shirts and hoodies)
         $trendingShirts = Product::active()
-            ->where(function ($query) {
+            ->whereHas('categoryRelation', function ($query) {
+                $query->where('name', 'T-Shirts')
+                      ->orWhere('name', 'LIKE', '%Shirt%');
+            })
+            ->orWhere(function ($query) {
                 $query->where('category', 'T-Shirts')
                       ->orWhere('category', 'LIKE', '%Shirt%');
             })
-            ->with('images')
+            ->with(['images', 'categoryRelation'])
             ->take(4)
             ->get()
             ->map(function ($product) {
@@ -71,18 +75,22 @@ class ProductController extends Controller
                     'price' => (float) $product->price,
                     'image' => $images->first()?->image_url ?? '/storage/images/placeholder.jpg',
                     'hoverImage' => $images->count() > 1 ? $images->get(1)->image_url : null,
-                    'category' => $product->category ?? 'SHIRTS FROM ALCHEMY',
+                    'category' => $product->categoryRelation?->name ?? $product->category ?? 'SHIRTS FROM ALCHEMY',
                     'backgroundGradient' => 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
                     'slug' => $product->slug,
                 ];
             });
 
         $trendingHoodies = Product::active()
-            ->where(function ($query) {
+            ->whereHas('categoryRelation', function ($query) {
+                $query->where('name', 'Hoodies')
+                      ->orWhere('name', 'LIKE', '%Hoodie%');
+            })
+            ->orWhere(function ($query) {
                 $query->where('category', 'Hoodies')
                       ->orWhere('category', 'LIKE', '%Hoodie%');
             })
-            ->with('images')
+            ->with(['images', 'categoryRelation'])
             ->take(4)
             ->get()
             ->map(function ($product) {
@@ -93,7 +101,7 @@ class ProductController extends Controller
                     'price' => (float) $product->price,
                     'image' => $images->first()?->image_url ?? '/storage/images/placeholder.jpg',
                     'hoverImage' => $images->count() > 1 ? $images->get(1)->image_url : null,
-                    'category' => $product->category ?? 'HOODIES FROM SERPENTS & ANGELS',
+                    'category' => $product->categoryRelation?->name ?? $product->category ?? 'HOODIES FROM SERPENTS & ANGELS',
                     'backgroundGradient' => 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
                     'slug' => $product->slug,
                 ];
@@ -112,10 +120,19 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $products = Product::active()
+        $query = Product::active()
             ->ordered()
-            ->with('images')
-            ->get()
+            ->with(['images', 'categoryRelation']);
+
+        // Filter by category if provided
+        if ($request->has('category')) {
+            $categorySlug = $request->query('category');
+            $query->whereHas('categoryRelation', function ($q) use ($categorySlug) {
+                $q->where('slug', $categorySlug);
+            })->orWhere('category', $categorySlug);
+        }
+
+        $products = $query->get()
             ->map(function ($product) {
                 return [
                     'id' => $product->id,
@@ -123,7 +140,7 @@ class ProductController extends Controller
                     'slug' => $product->slug,
                     'price' => (float) $product->price,
                     'image' => $product->images->first()?->image_url ?? '/storage/images/placeholder.jpg',
-                    'category' => $product->category,
+                    'category' => $product->categoryRelation?->name ?? $product->category,
                 ];
             });
 
@@ -139,7 +156,7 @@ class ProductController extends Controller
     public function show($slug)
     {
         $product = Product::where('slug', $slug)
-            ->with(['images', 'variants', 'specifications'])
+            ->with(['images', 'variants', 'specifications', 'categoryRelation'])
             ->first();
 
         if (!$product) {
@@ -157,14 +174,32 @@ class ProductController extends Controller
             })
             ->toArray();
 
-        $sizes = $product->sizes()
+        // Get sizes with stock information
+        $sizeVariants = $product->sizes()
             ->get()
-            ->pluck('name')
+            ->map(function ($variant) {
+                return [
+                    'name' => $variant->name,
+                    'quantity' => $variant->quantity ?? 0,
+                    'inStock' => ($variant->quantity ?? 0) > 0 && $variant->is_active,
+                ];
+            })
             ->toArray();
         
+        $sizes = array_column($sizeVariants, 'name');
+        
         // If no sizes exist, provide default sizes for clothing items
-        if (empty($sizes) && in_array(strtolower($product->category ?? ''), ['t-shirts', 't-shirt', 'shirts', 'shirt', 'hoodies', 'hoodie'])) {
+        $categoryName = strtolower($product->categoryRelation?->name ?? $product->category ?? '');
+        if (empty($sizes) && in_array($categoryName, ['t-shirts', 't-shirt', 'shirts', 'shirt', 'hoodies', 'hoodie'])) {
             $sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+            // Create default size variants with no stock
+            $sizeVariants = array_map(function ($size) {
+                return [
+                    'name' => $size,
+                    'quantity' => 0,
+                    'inStock' => false,
+                ];
+            }, $sizes);
         }
 
         // Format specifications
@@ -185,6 +220,9 @@ class ProductController extends Controller
         // Use the model's isOutOfStock method and invert it
         $isInStock = !$product->isOutOfStock();
 
+        // Calculate total stock from size variants
+        $totalStock = collect($sizeVariants)->sum('quantity');
+        
         $formattedProduct = [
             'id' => $product->id,
             'name' => $product->name,
@@ -195,8 +233,10 @@ class ProductController extends Controller
             'images' => $images,
             'colors' => $colors,
             'sizes' => $sizes,
-            'category' => $product->category ?? '',
+            'sizeStock' => $sizeVariants, // Size-specific stock information
+            'category' => $product->categoryRelation?->name ?? $product->category ?? '',
             'inStock' => $isInStock,
+            'totalStock' => $totalStock, // Total stock across all sizes
             'sku' => $product->sku,
             'specifications' => $specifications,
         ];

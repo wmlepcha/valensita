@@ -51,6 +51,14 @@ class VariantsRelationManager extends RelationManager
                     ->maxLength(255)
                     ->helperText('Optional size value or code')
                     ->visible(fn (Forms\Get $get) => $get('type') === 'size'),
+                Forms\Components\TextInput::make('quantity')
+                    ->label('Stock Quantity')
+                    ->numeric()
+                    ->default(0)
+                    ->minValue(0)
+                    ->required()
+                    ->visible(fn (Forms\Get $get) => $get('type') === 'size')
+                    ->helperText('Number of items available in this size. Only for size variants.'),
                 Forms\Components\TextInput::make('order')
                     ->label('Display Order')
                     ->numeric()
@@ -87,12 +95,25 @@ class VariantsRelationManager extends RelationManager
                     ->placeholder('—')
                     ->default('—')
                     ->formatStateUsing(function ($state, $record) {
+                        if (!$record) return '—';
                         if ($record->type === 'color' && $state) {
                             return '<span style="display: inline-block; width: 20px; height: 20px; background-color: ' . $state . '; border: 1px solid #ccc; border-radius: 3px; margin-right: 8px;"></span>' . $state;
                         }
                         return $state ?: '—';
                     })
                     ->html(),
+                Tables\Columns\TextColumn::make('quantity')
+                    ->label('Stock')
+                    ->numeric()
+                    ->sortable()
+                    ->visible(fn ($record) => $record && $record->type === 'size')
+                    ->badge()
+                    ->color(function ($record) {
+                        if (!$record || $record->type !== 'size') return 'gray';
+                        return $record->quantity > 10 ? 'success' : ($record->quantity > 0 ? 'warning' : 'danger');
+                    })
+                    ->placeholder('—')
+                    ->default('—'),
                 Tables\Columns\TextColumn::make('order')
                     ->label('Order')
                     ->numeric()
@@ -114,25 +135,64 @@ class VariantsRelationManager extends RelationManager
                     ->falseLabel('Inactive only'),
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                Tables\Actions\CreateAction::make()
+                    ->after(function () {
+                        $this->updateProductQuantity();
+                    }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->after(function () {
+                        $this->updateProductQuantity();
+                    }),
+                Tables\Actions\DeleteAction::make()
+                    ->after(function () {
+                        $this->updateProductQuantity();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->after(function () {
+                            $this->updateProductQuantity();
+                        }),
                     Tables\Actions\BulkAction::make('mark_active')
                         ->label('Mark as Active')
-                        ->action(fn ($records) => $records->each->update(['is_active' => true]))
+                        ->action(function ($records) {
+                            $records->each->update(['is_active' => true]);
+                            $this->updateProductQuantity();
+                        })
                         ->requiresConfirmation(),
                     Tables\Actions\BulkAction::make('mark_inactive')
                         ->label('Mark as Inactive')
-                        ->action(fn ($records) => $records->each->update(['is_active' => false]))
+                        ->action(function ($records) {
+                            $records->each->update(['is_active' => false]);
+                            $this->updateProductQuantity();
+                        })
                         ->requiresConfirmation(),
                 ]),
             ])
             ->defaultSort('order');
+    }
+
+    /**
+     * Update the product's total quantity from size variants.
+     */
+    protected function updateProductQuantity(): void
+    {
+        $product = $this->getOwnerRecord();
+        
+        if (!$product) {
+            return;
+        }
+
+        // Calculate total quantity from all active size variants
+        $totalQuantity = $product->variants()
+            ->where('type', 'size')
+            ->where('is_active', true)
+            ->sum('quantity') ?? 0;
+
+        // Update the product's quantity field
+        $product->update(['quantity' => $totalQuantity]);
     }
 }

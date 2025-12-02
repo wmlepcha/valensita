@@ -56,6 +56,13 @@ export type PageProps<
     footer: Footer | null;
     cart: {
         count: number;
+        items?: Array<{
+            key: string;
+            product_id: number;
+            quantity: number;
+            size: string | null;
+            color: string | null;
+        }>;
     };
     pageLinks?: {
         support?: PageLink[];

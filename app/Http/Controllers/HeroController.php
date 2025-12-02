@@ -39,7 +39,7 @@ class HeroController extends Controller
         // Get new arrival products from NewArrival model
         $newArrivals = NewArrival::active()
             ->ordered()
-            ->with(['product.images'])
+            ->with(['product.images', 'product.categoryRelation'])
             ->take(4)
             ->get()
             ->map(function ($newArrival) {
@@ -73,7 +73,7 @@ class HeroController extends Controller
                     'image' => $mainImage,
                     'hoverImage' => $hoverImage,
                     'badge' => $newArrival->look_number,
-                    'category' => $newArrival->drop_number ?? $product?->category ?? 'New Arrivals',
+                    'category' => $newArrival->drop_number ?? $product?->categoryRelation?->name ?? $product?->category ?? 'New Arrivals',
                     'slug' => $product?->slug ?? 'new-arrival-' . $newArrival->id,
                 ];
             });

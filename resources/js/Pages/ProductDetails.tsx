@@ -1,6 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import MainLayout from '../Layouts/MainLayout';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import { PageProps } from '@/types';
+
+interface SizeStock {
+  name: string;
+  quantity: number;
+  inStock: boolean;
+}
 
 interface Product {
   id: number;
@@ -12,6 +19,8 @@ interface Product {
   images: string[];
   colors: { name: string; hex: string; }[];
   sizes: string[];
+  sizeStock?: SizeStock[];
+  totalStock?: number;
   category: string;
   inStock: boolean;
   sku?: string;
@@ -27,13 +36,51 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const { cart } = usePage<PageProps>().props;
 
   // Ensure selectedColor is valid
   const hasColors = product.colors && product.colors.length > 0;
   const validSelectedColor = hasColors && selectedColor < product.colors.length ? selectedColor : 0;
 
-  // Debug: Log stock status (remove in production)
-  // console.log('Product stock status:', { inStock: product.inStock, productId: product.id });
+  // Calculate cart quantities per size
+  const cartQuantitiesBySize = useMemo(() => {
+    const quantities: Record<string, number> = {};
+    if (cart?.items) {
+      cart.items.forEach((item: any) => {
+        if (item.product_id === product.id && item.size) {
+          const key = item.size;
+          quantities[key] = (quantities[key] || 0) + item.quantity;
+        }
+      });
+    }
+    return quantities;
+  }, [cart, product.id]);
+
+  // Get available stock for a size (total stock minus what's in cart)
+  const getAvailableStockForSize = (sizeName: string): number => {
+    if (!product.sizeStock) return 0;
+    const sizeStock = product.sizeStock.find(s => s.name === sizeName);
+    if (!sizeStock) return 0;
+    const inCart = cartQuantitiesBySize[sizeName] || 0;
+    return Math.max(0, sizeStock.quantity - inCart);
+  };
+
+  // Get stock for selected size (with cart adjustment)
+  const getSelectedSizeStock = (): SizeStock | null => {
+    if (!selectedSize || !product.sizeStock) return null;
+    const sizeStock = product.sizeStock.find(s => s.name === selectedSize);
+    if (!sizeStock) return null;
+    
+    const availableStock = getAvailableStockForSize(selectedSize);
+    return {
+      ...sizeStock,
+      quantity: availableStock,
+      inStock: availableStock > 0 && sizeStock.inStock,
+    };
+  };
+
+  const selectedSizeStock = getSelectedSizeStock();
+  const maxQuantity = selectedSizeStock ? selectedSizeStock.quantity : (product.totalStock || 0);
 
   const handleAddToCart = async () => {
     // Only require size if sizes are available
@@ -41,6 +88,19 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     if (hasSizes && !selectedSize) {
       alert('Please select a size');
       return;
+    }
+
+    // Check stock for selected size
+    if (hasSizes && selectedSize) {
+      const sizeStock = getSelectedSizeStock();
+      if (!sizeStock || !sizeStock.inStock) {
+        alert(`Size ${selectedSize} is out of stock`);
+        return;
+      }
+      if (quantity > sizeStock.quantity) {
+        alert(`Only ${sizeStock.quantity} items available in size ${selectedSize}`);
+        return;
+      }
     }
 
     try {
@@ -51,8 +111,16 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
         color: hasColors ? product.colors[validSelectedColor]?.name : null,
       });
 
-      // Reload page to update cart count in header
-      router.reload({ only: ['cart'] });
+      // Reload shared props to update cart count in header
+      // The cart prop update will trigger useMemo to recalculate available stock
+      router.reload({ 
+        only: ['cart'],
+        preserveState: true,
+        preserveScroll: true,
+      });
+      
+      // Dispatch event to update cart count immediately (fallback)
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
       
       // Open cart drawer instead of showing alert
       window.dispatchEvent(new CustomEvent('openCartDrawer'));
@@ -191,20 +259,46 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                     </Link>
                   </div>
                   <div className="grid grid-cols-6 gap-2">
-                    {product.sizes.map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`h-10 text-xs font-medium border rounded transition-all duration-200 ${
-                          selectedSize === size
-                            ? 'bg-neutral-900 text-white border-neutral-900'
-                            : 'bg-white text-neutral-900 border-neutral-200 hover:border-neutral-900'
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
+                    {product.sizes.map((size) => {
+                      const sizeStock = product.sizeStock?.find(s => s.name === size);
+                      const availableStock = getAvailableStockForSize(size);
+                      const isOutOfStock = !sizeStock || !sizeStock.inStock || availableStock <= 0;
+                      
+                      return (
+                        <button
+                          key={size}
+                          onClick={() => {
+                            if (!isOutOfStock) {
+                              setSelectedSize(size);
+                              // Reset quantity to 1 when changing size
+                              setQuantity(1);
+                            }
+                          }}
+                          disabled={isOutOfStock}
+                          className={`h-10 text-xs font-medium border rounded transition-all duration-200 relative ${
+                            selectedSize === size
+                              ? 'bg-neutral-900 text-white border-neutral-900'
+                              : isOutOfStock
+                              ? 'bg-neutral-100 text-neutral-400 border-neutral-200 cursor-not-allowed opacity-50'
+                              : 'bg-white text-neutral-900 border-neutral-200 hover:border-neutral-900'
+                          }`}
+                          title={isOutOfStock ? 'Out of Stock' : `${availableStock} available`}
+                        >
+                          {size}
+                          {!isOutOfStock && availableStock > 0 && (
+                            <span className="absolute -top-1 -right-1 text-[8px] bg-neutral-900 text-white rounded-full w-4 h-4 flex items-center justify-center">
+                              {availableStock}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
+                  {selectedSize && selectedSizeStock && (
+                    <p className="text-xs text-neutral-500">
+                      {selectedSizeStock.quantity} available in size {selectedSize}
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -217,14 +311,21 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                       <div className="flex items-center border border-neutral-200 rounded w-32">
                         <button
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900"
+                          disabled={quantity <= 1}
+                          className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           -
                         </button>
                         <span className="flex-1 text-center text-sm font-medium">{quantity}</span>
                         <button
-                          onClick={() => setQuantity(quantity + 1)}
-                          className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900"
+                          onClick={() => {
+                            const maxQty = selectedSize && selectedSizeStock 
+                              ? selectedSizeStock.quantity 
+                              : (product.totalStock || 999);
+                            setQuantity(Math.min(maxQty, quantity + 1));
+                          }}
+                          disabled={quantity >= maxQuantity}
+                          className="w-10 h-full flex items-center justify-center hover:bg-neutral-50 transition-colors text-neutral-500 hover:text-neutral-900 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           +
                         </button>
@@ -233,7 +334,11 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                       {/* Add to Cart Button */}
                       <button
                         onClick={handleAddToCart}
-                        disabled={product.sizes && product.sizes.length > 0 && !selectedSize}
+                        disabled={
+                          (product.sizes && product.sizes.length > 0 && !selectedSize) ||
+                          (selectedSize && selectedSizeStock && !selectedSizeStock.inStock) ||
+                          quantity > maxQuantity
+                        }
                         className="flex-1 bg-neutral-900 text-white rounded font-bold tracking-widest uppercase text-xs hover:bg-neutral-800 transition-all disabled:bg-neutral-300 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                       >
                         Add to Cart

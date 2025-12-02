@@ -56,20 +56,28 @@ class ProductResource extends Resource
                             ->columnSpanFull()
                             ->label('Description')
                             ->helperText('Product description displayed on the product page'),
-                        Forms\Components\Select::make('category')
+                        Forms\Components\Select::make('category_id')
                             ->label('Category')
-                            ->options([
-                                'T-Shirts' => 'T-Shirts',
-                                'Hoodies' => 'Hoodies',
-                                'Shirts' => 'Shirts',
-                                'Pants' => 'Pants',
-                                'Accessories' => 'Accessories',
-                                'New Arrivals' => 'New Arrivals',
-                                'Sale' => 'Sale',
-                            ])
+                            ->relationship('categoryRelation', 'name')
                             ->searchable()
                             ->preload()
-                            ->required(),
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                        $set('slug', \Illuminate\Support\Str::slug($state));
+                                    }),
+                                Forms\Components\TextInput::make('slug')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique(\App\Models\Category::class, 'slug'),
+                                Forms\Components\Toggle::make('is_active')
+                                    ->default(true),
+                            ])
+                            ->required()
+                            ->helperText('Select a category or create a new one'),
                     ])
                     ->columns(2),
 
@@ -100,12 +108,51 @@ class ProductResource extends Resource
                             ->unique(ignoreRecord: true)
                             ->helperText('Stock Keeping Unit - unique product identifier'),
                         Forms\Components\TextInput::make('quantity')
-                            ->required()
+                            ->label('Quantity in Stock')
                             ->numeric()
                             ->default(0)
-                            ->label('Quantity in Stock')
                             ->minValue(0)
-                            ->helperText('Number of items available'),
+                            ->required(fn ($record) => !$record || !$record->variants()->where('type', 'size')->exists())
+                            ->disabled(function ($record) {
+                                if (!$record) return false;
+                                return $record->variants()->where('type', 'size')->exists();
+                            })
+                            ->dehydrated(function ($record) {
+                                // Don't save quantity if product has size variants (it's calculated)
+                                if (!$record) return true;
+                                return !$record->variants()->where('type', 'size')->exists();
+                            })
+                            ->helperText(function ($record) {
+                                if (!$record) {
+                                    return 'Number of items available';
+                                }
+                                
+                                $hasSizeVariants = $record->variants()->where('type', 'size')->exists();
+                                
+                                if ($hasSizeVariants) {
+                                    $totalStock = $record->variants()
+                                        ->where('type', 'size')
+                                        ->where('is_active', true)
+                                        ->sum('quantity') ?? 0;
+                                    return "Total stock: {$totalStock} (automatically calculated from size variants)";
+                                }
+                                
+                                return 'Number of items available';
+                            })
+                            ->afterStateHydrated(function (Forms\Components\TextInput $component, $record) {
+                                if (!$record) return;
+                                
+                                $hasSizeVariants = $record->variants()->where('type', 'size')->exists();
+                                
+                                if ($hasSizeVariants) {
+                                    // Calculate total from size variants
+                                    $totalStock = $record->variants()
+                                        ->where('type', 'size')
+                                        ->where('is_active', true)
+                                        ->sum('quantity') ?? 0;
+                                    $component->state($totalStock);
+                                }
+                            }),
                         Forms\Components\Toggle::make('in_stock')
                             ->label('In Stock')
                             ->default(true)
@@ -165,11 +212,13 @@ class ProductResource extends Resource
                     ->sortable()
                     ->weight('bold')
                     ->limit(30),
-                Tables\Columns\TextColumn::make('category')
+                Tables\Columns\TextColumn::make('categoryRelation.name')
+                    ->label('Category')
                     ->searchable()
                     ->sortable()
                     ->badge()
-                    ->color('gray'),
+                    ->color('gray')
+                    ->placeholder('No category'),
                 Tables\Columns\TextColumn::make('price')
                     ->money('USD')
                     ->sortable()
@@ -207,16 +256,11 @@ class ProductResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('category')
-                    ->options([
-                        'T-Shirts' => 'T-Shirts',
-                        'Hoodies' => 'Hoodies',
-                        'Shirts' => 'Shirts',
-                        'Pants' => 'Pants',
-                        'Accessories' => 'Accessories',
-                        'New Arrivals' => 'New Arrivals',
-                        'Sale' => 'Sale',
-                    ]),
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Category')
+                    ->relationship('categoryRelation', 'name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\TernaryFilter::make('in_stock')
                     ->label('In Stock')
                     ->placeholder('All')

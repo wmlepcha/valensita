@@ -60,8 +60,15 @@ export default function ProductCard({
           color: color,
         });
         
-        // Reload page to update cart count
-        router.reload({ only: ['cart'] });
+        // Reload shared props to update cart count in header
+        router.reload({ 
+          only: ['cart'],
+          preserveState: true,
+          preserveScroll: true,
+        });
+        
+        // Dispatch event to update cart count immediately (fallback)
+        window.dispatchEvent(new CustomEvent('cartUpdated'));
         
         // Open cart drawer instead of showing alert
         window.dispatchEvent(new CustomEvent('openCartDrawer'));

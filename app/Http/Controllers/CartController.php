@@ -64,41 +64,97 @@ class CartController extends Controller
             'color' => 'nullable|string',
         ]);
 
-        $product = Product::findOrFail($request->product_id);
+        $product = Product::with('variants')->findOrFail($request->product_id);
 
-        // Check if product is in stock
-        if (!$product->in_stock || $product->quantity <= 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Product is out of stock',
-            ], 400);
+        // Check stock based on size if provided
+        if ($request->size) {
+            $sizeVariant = $product->variants()
+                ->where('type', 'size')
+                ->where('name', $request->size)
+                ->where('is_active', true)
+                ->first();
+
+            if (!$sizeVariant) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Selected size is not available',
+                ], 400);
+            }
+
+            $availableStock = $sizeVariant->quantity ?? 0;
+            
+            if ($availableStock <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Size ' . $request->size . ' is out of stock',
+                ], 400);
+            }
+
+            // Check if this exact item already exists in cart
+            $cart = Session::get('cart', []);
+            $itemKey = $this->generateCartItemKey(
+                $request->product_id,
+                $request->size,
+                $request->color
+            );
+
+            $currentCartQuantity = isset($cart[$itemKey]) ? $cart[$itemKey]['quantity'] : 0;
+            $newQuantity = $currentCartQuantity + $request->quantity;
+
+            if ($newQuantity > $availableStock) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Not enough stock available. Only ' . $availableStock . ' items available in size ' . $request->size . '.',
+                ], 400);
+            }
+        } else {
+            // No size selected - check general product stock
+            if (!$product->in_stock) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product is out of stock',
+                ], 400);
+            }
+
+            // If product has sizes, require size selection
+            $hasSizes = $product->sizes()->count() > 0;
+            if ($hasSizes) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please select a size',
+                ], 400);
+            }
+
+            // For products without sizes, check general quantity
+            $cart = Session::get('cart', []);
+            $itemKey = $this->generateCartItemKey(
+                $request->product_id,
+                null,
+                $request->color
+            );
+
+            $currentCartQuantity = isset($cart[$itemKey]) ? $cart[$itemKey]['quantity'] : 0;
+            $newQuantity = $currentCartQuantity + $request->quantity;
+
+            if ($product->quantity > 0 && $newQuantity > $product->quantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Not enough stock available. Only ' . $product->quantity . ' items available.',
+                ], 400);
+            }
         }
 
         $cart = Session::get('cart', []);
-        
-        // Create a unique key for this cart item (product + size + color combination)
         $itemKey = $this->generateCartItemKey(
             $request->product_id,
             $request->size,
             $request->color
         );
 
-        // Check if this exact item already exists in cart
+        // Add or update cart item
         if (isset($cart[$itemKey])) {
-            // Update quantity
-            $newQuantity = $cart[$itemKey]['quantity'] + $request->quantity;
-            
-            // Check stock availability
-            if ($newQuantity > $product->quantity) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Not enough stock available. Only ' . $product->quantity . ' items available.',
-                ], 400);
-            }
-
-            $cart[$itemKey]['quantity'] = $newQuantity;
+            $cart[$itemKey]['quantity'] += $request->quantity;
         } else {
-            // Add new item
             $cart[$itemKey] = [
                 'product_id' => $request->product_id,
                 'quantity' => $request->quantity,
@@ -132,14 +188,38 @@ class CartController extends Controller
         }
 
         $item = $cart[$key];
-        $product = Product::findOrFail($item['product_id']);
+        $product = Product::with('variants')->findOrFail($item['product_id']);
 
-        // Check stock availability
-        if ($request->quantity > $product->quantity) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Not enough stock available. Only ' . $product->quantity . ' items available.',
-            ], 400);
+        // Check stock based on size if provided
+        if (!empty($item['size'])) {
+            $sizeVariant = $product->variants()
+                ->where('type', 'size')
+                ->where('name', $item['size'])
+                ->where('is_active', true)
+                ->first();
+
+            if (!$sizeVariant || ($sizeVariant->quantity ?? 0) <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Size ' . $item['size'] . ' is out of stock',
+                ], 400);
+            }
+
+            $availableStock = $sizeVariant->quantity ?? 0;
+            if ($request->quantity > $availableStock) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Not enough stock available. Only ' . $availableStock . ' items available in size ' . $item['size'] . '.',
+                ], 400);
+            }
+        } else {
+            // No size - check general product stock
+            if ($product->quantity > 0 && $request->quantity > $product->quantity) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Not enough stock available. Only ' . $product->quantity . ' items available.',
+                ], 400);
+            }
         }
 
         $cart[$key]['quantity'] = $request->quantity;

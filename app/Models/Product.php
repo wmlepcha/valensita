@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Product extends Model
 {
@@ -14,6 +15,7 @@ class Product extends Model
         'price',
         'original_price',
         'category',
+        'category_id',
         'sku',
         'in_stock',
         'quantity',
@@ -71,6 +73,22 @@ class Product extends Model
     }
 
     /**
+     * Get the category that owns the product.
+     */
+    public function categoryRelation(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    /**
+     * Get the category name (for backward compatibility).
+     */
+    public function getCategoryNameAttribute(): ?string
+    {
+        return $this->categoryRelation?->name ?? $this->category;
+    }
+
+    /**
      * Scope to get only active products.
      */
     public function scopeActive($query)
@@ -91,15 +109,53 @@ class Product extends Model
      */
     public function scopeInStock($query)
     {
-        return $query->where('quantity', '>', 0)->where('in_stock', true);
+        return $query->where('in_stock', true)->where(function ($q) {
+            $q->where('quantity', '>', 0)
+              ->orWhereHas('variants', function ($variantQuery) {
+                  $variantQuery->where('type', 'size')
+                               ->where('is_active', true)
+                               ->where('quantity', '>', 0);
+              });
+        });
     }
 
     /**
      * Check if product is out of stock.
+     * For products with sizes, checks if any size has stock.
+     * For products without sizes, checks general quantity.
      */
     public function isOutOfStock(): bool
     {
-        return $this->quantity <= 0 || !$this->in_stock;
+        if (!$this->in_stock) {
+            return true;
+        }
+
+        // Check if product has size variants
+        $hasSizes = $this->sizes()->count() > 0;
+        
+        if ($hasSizes) {
+            // Check if any size variant has stock
+            $hasStock = $this->variants()
+                ->where('type', 'size')
+                ->where('is_active', true)
+                ->where('quantity', '>', 0)
+                ->exists();
+            return !$hasStock;
+        }
+
+        // For products without sizes, check general quantity
+        return $this->quantity <= 0;
+    }
+
+    /**
+     * Get total stock from all size variants.
+     */
+    public function getTotalStockFromVariants(): int
+    {
+        return $this->variants()
+            ->where('type', 'size')
+            ->where('is_active', true)
+            ->sum('quantity') ?? 0;
     }
 
     /**

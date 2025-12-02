@@ -74,7 +74,16 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         quantity: newQuantity,
       });
       setCart(response.data);
-      router.reload({ only: ['cart'] });
+      
+      // Reload shared props to update cart count in header
+      router.reload({ 
+        only: ['cart'],
+        preserveState: true,
+        preserveScroll: true,
+      });
+      
+      // Dispatch event to update cart count immediately
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to update quantity';
       alert(message);
@@ -88,7 +97,16 @@ export default function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     try {
       const response = await window.axios.delete(route('cart.remove', key));
       setCart(response.data);
-      router.reload({ only: ['cart'] });
+      
+      // Reload shared props to update cart count in header
+      router.reload({ 
+        only: ['cart'],
+        preserveState: true,
+        preserveScroll: true,
+      });
+      
+      // Dispatch event to update cart count immediately
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
     } catch (error: any) {
       const message = error.response?.data?.message || 'Failed to remove item';
       alert(message);
