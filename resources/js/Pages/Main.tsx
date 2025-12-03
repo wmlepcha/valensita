@@ -186,7 +186,7 @@ export default function Main({
                 )}
               </div>
               <p className="text-[9px] xl:text-[10px] 2xl:text-xs font-semibold text-neutral-600 uppercase tracking-wider px-4 xl:px-6 2xl:px-8">
-                {product.category}
+                {product.name}
               </p>
             </Link>
           ))}
@@ -222,7 +222,7 @@ export default function Main({
                 )}
               </div>
               <p className="text-[9px] xl:text-[10px] 2xl:text-xs font-semibold text-neutral-600 uppercase tracking-wider px-4 xl:px-6 2xl:px-8">
-                {product.category}
+                {product.name}
               </p>
             </Link>
           ))}

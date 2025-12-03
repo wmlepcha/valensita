@@ -36,9 +36,9 @@ class ImagesRelationManager extends RelationManager
                         '4:3',
                         '1:1',
                     ])
-                    ->maxSize(10240) // 10MB
+                    ->maxSize(2048) // 2MB
                     ->required()
-                    ->helperText('Upload product image. First image will be used as the main product image.'),
+                    ->helperText('Upload product image. First image will be used as the main product image. Maximum file size: 2MB. Please compress images before uploading.'),
                 Forms\Components\TextInput::make('alt_text')
                     ->label('Alt Text')
                     ->maxLength(255)

@@ -16,6 +16,7 @@ class Product extends Model
         'original_price',
         'category',
         'category_id',
+        'subcategory_id',
         'sku',
         'in_stock',
         'quantity',
@@ -78,6 +79,14 @@ class Product extends Model
     public function categoryRelation(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    /**
+     * Get the subcategory that owns the product.
+     */
+    public function subcategory(): BelongsTo
+    {
+        return $this->belongsTo(Subcategory::class, 'subcategory_id');
     }
 
     /**

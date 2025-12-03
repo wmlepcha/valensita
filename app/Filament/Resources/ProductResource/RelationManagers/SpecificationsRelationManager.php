@@ -30,6 +30,8 @@ class SpecificationsRelationManager extends RelationManager
                         'LINING' => 'Lining',
                         'HEIGHT' => 'Height',
                         'CARE' => 'Care Instructions',
+                        'SHIPPING' => 'Shipping Information',
+                        'RETURNS' => 'Returns Policy',
                         'ORIGIN' => 'Country of Origin',
                         'FIT' => 'Fit',
                         'STYLE' => 'Style',

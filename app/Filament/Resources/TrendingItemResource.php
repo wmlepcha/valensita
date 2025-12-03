@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\Concerns\HasProductRelationship;
 use App\Filament\Resources\TrendingItemResource\Pages;
 use App\Filament\Resources\TrendingItemResource\RelationManagers;
 use App\Models\TrendingItem;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TrendingItemResource extends Resource
 {
+    use HasProductRelationship;
     protected static ?string $model = TrendingItem::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-star';
@@ -31,63 +33,10 @@ class TrendingItemResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Basic Information')
+                Forms\Components\Section::make('Product Selection')
                     ->schema([
-                        Forms\Components\TextInput::make('title')
-                            ->required()
-                            ->maxLength(255)
-                            ->label('Title')
-                            ->helperText('Product name or title'),
-                        Forms\Components\TextInput::make('slug')
-                            ->required()
-                            ->maxLength(255)
-                            ->label('Slug/Link')
-                            ->placeholder('/product/product-slug')
-                            ->helperText('URL slug or link for this item'),
-                        Forms\Components\TextInput::make('category_label')
-                            ->required()
-                            ->maxLength(255)
-                            ->label('Category Label')
-                            ->placeholder('e.g., T-SHIRTS, HOODIES')
-                            ->helperText('Category text displayed below the image'),
-                    ])
-                    ->columns(2),
-                
-                Forms\Components\Section::make('Images')
-                    ->schema([
-                        Forms\Components\FileUpload::make('image_url')
-                            ->label('Main Image')
-                            ->required()
-                            ->image()
-                            ->directory('trending-items-images')
-                            ->disk('public')
-                            ->visibility('public')
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                null,
-                                '1:1',
-                                '4:3',
-                                '16:9',
-                            ])
-                            ->maxSize(10240) // 10MB
-                            ->helperText('Main product image')
-                            ->columnSpanFull(),
-                        Forms\Components\FileUpload::make('hover_image_url')
-                            ->label('Hover Image (Optional)')
-                            ->image()
-                            ->directory('trending-items-images')
-                            ->disk('public')
-                            ->visibility('public')
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                null,
-                                '1:1',
-                                '4:3',
-                                '16:9',
-                            ])
-                            ->maxSize(10240) // 10MB
-                            ->helperText('Image shown on hover (optional)')
-                            ->columnSpanFull(),
+                        static::productSelectField(),
+                        static::productInfoPlaceholder(),
                     ]),
                 
                 Forms\Components\Section::make('Display Settings')
@@ -105,6 +54,7 @@ class TrendingItemResource extends Resource
                             ->numeric()
                             ->default(0)
                             ->label('Order in Row')
+                            ->required()
                             ->helperText('Lower numbers appear first (max 4 items per row)'),
                         Forms\Components\TextInput::make('background_gradient')
                             ->maxLength(255)
@@ -113,17 +63,6 @@ class TrendingItemResource extends Resource
                             ->helperText('CSS gradient for background (optional)'),
                     ])
                     ->columns(3),
-                
-                Forms\Components\Section::make('Product Link (Optional)')
-                    ->schema([
-                        Forms\Components\Select::make('product_id')
-                            ->label('Link to Product')
-                            ->relationship('product', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->nullable()
-                            ->helperText('Optionally link to an actual product'),
-                    ]),
                 
                 Forms\Components\Section::make('Settings')
                     ->schema([
@@ -160,12 +99,7 @@ class TrendingItemResource extends Resource
                         
                         return \Illuminate\Support\Facades\Storage::disk('public')->url($imageUrl);
                     }),
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('category_label')
-                    ->label('Category')
-                    ->searchable(),
+                static::productTableColumn(),
                 Tables\Columns\TextColumn::make('row')
                     ->label('Row')
                     ->badge()

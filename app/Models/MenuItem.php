@@ -5,12 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Category;
+use App\Models\Subcategory;
 
 class MenuItem extends Model
 {
     protected $fillable = [
         'menu_id',
         'parent_id',
+        'category_id',
+        'subcategory_id',
         'label',
         'url',
         'image_url',
@@ -66,11 +70,63 @@ class MenuItem extends Model
     }
 
     /**
+     * Get the category that this menu item links to.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the subcategory that this menu item links to.
+     */
+    public function subcategory(): BelongsTo
+    {
+        return $this->belongsTo(Subcategory::class);
+    }
+
+    /**
      * Get the child menu items.
      */
     public function children()
     {
         return $this->hasMany(MenuItem::class, 'parent_id')->orderBy('order');
+    }
+
+    /**
+     * Get the URL for this menu item.
+     * Auto-generates from subcategory or category if linked, otherwise uses manual URL.
+     * Note: This accessor is used when accessing $item->url directly.
+     * In middleware, we generate URLs manually to avoid N+1 queries.
+     */
+    public function getUrlAttribute($value)
+    {
+        // If subcategory is linked, auto-generate URL with both category and subcategory
+        if ($this->subcategory_id) {
+            // Only load subcategory if not already loaded (to avoid N+1)
+            if (!$this->relationLoaded('subcategory')) {
+                $this->load('subcategory');
+            }
+            
+            if ($this->subcategory && $this->subcategory->category) {
+                return '/shop?category=' . $this->subcategory->category->slug . '&subcategory=' . $this->subcategory->slug;
+            }
+        }
+        
+        // If category is linked, auto-generate URL
+        if ($this->category_id) {
+            // Only load category if not already loaded (to avoid N+1)
+            if (!$this->relationLoaded('category')) {
+                $this->load('category');
+            }
+            
+            if ($this->category) {
+                return '/shop?category=' . $this->category->slug;
+            }
+        }
+        
+        // Otherwise use manual URL
+        return $value;
     }
 
     /**

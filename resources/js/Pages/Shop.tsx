@@ -1,6 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import MainLayout from '../Layouts/MainLayout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface Subcategory {
+  id: number;
+  name: string;
+  slug: string;
+  category_id: number;
+  category_name: string | null;
+}
 
 interface Product {
   id: number;
@@ -9,36 +23,117 @@ interface Product {
   price: number;
   image: string;
   category: string;
+  subcategory?: string | null;
+  subcategory_slug?: string | null;
+  available_sizes?: string[];
 }
 
 interface ShopProps {
   products: Product[];
-  category?: string;
+  categories: Category[];
+  subcategories: Subcategory[];
+  sizes: string[];
+  filters: {
+    category?: string;
+    subcategory?: string | string[];
+    size?: string;
+    min_price?: number;
+    max_price?: number;
+  };
 }
 
-export default function Shop({ products, category: initialCategory }: ShopProps) {
+export default function Shop({ 
+  products, 
+  categories, 
+  subcategories, 
+  sizes,
+  filters: initialFilters 
+}: ShopProps) {
   const { url } = usePage();
   const [sortBy, setSortBy] = useState('recommended');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(initialCategory || null);
-  const [priceRange, setPriceRange] = useState([0, 10000]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(initialFilters.category || null);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(() => {
+    const sub = initialFilters.subcategory;
+    if (!sub) return [];
+    if (Array.isArray(sub)) return sub;
+    return sub.split(',').filter(s => s.trim());
+  });
+  const [selectedSize, setSelectedSize] = useState<string | null>(initialFilters.size || null);
+  const [priceRange, setPriceRange] = useState([
+    initialFilters.min_price || 0,
+    initialFilters.max_price || 10000
+  ]);
 
-  // Update selected category when URL parameter changes
+  // Update filters when URL parameters change
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('category');
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
+    setSelectedCategory(urlParams.get('category') || null);
+    const subcategoryParam = urlParams.get('subcategory');
+    if (subcategoryParam) {
+      setSelectedSubcategories(subcategoryParam.split(',').filter(s => s.trim()));
+    } else {
+      setSelectedSubcategories([]);
+    }
+    setSelectedSize(urlParams.get('size') || null);
+    const minPrice = urlParams.get('min_price');
+    const maxPrice = urlParams.get('max_price');
+    if (minPrice || maxPrice) {
+      setPriceRange([
+        minPrice ? parseInt(minPrice) : 0,
+        maxPrice ? parseInt(maxPrice) : 10000
+      ]);
     }
   }, [url]);
 
-  const categories = [
-    { name: 'All', value: null },
-    { name: 'T-Shirts', value: 'tshirts' },
-    { name: 'Hoodies', value: 'hoodies' },
-    { name: 'Oversized', value: 'oversized' },
-  ];
+  // Get subcategories for selected category
+  const availableSubcategories = useMemo(() => {
+    if (!selectedCategory) return [];
+    return subcategories.filter(sub => 
+      sub.category_name?.toLowerCase().replace(/\s+/g, '-') === selectedCategory ||
+      sub.category_id === categories.find(c => c.slug === selectedCategory)?.id
+    );
+  }, [selectedCategory, subcategories, categories]);
 
-  const sizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+  // Build filter URL
+  const buildFilterUrl = (updates: Record<string, string | string[] | null>) => {
+    const params = new URLSearchParams();
+    
+    const newCategory = updates.category !== undefined ? updates.category : selectedCategory;
+    const newSubcategories = updates.subcategories !== undefined 
+      ? (Array.isArray(updates.subcategories) ? updates.subcategories : [updates.subcategories].filter(Boolean))
+      : selectedSubcategories;
+    const newSize = updates.size !== undefined ? updates.size : selectedSize;
+    const newMinPrice = updates.min_price !== undefined ? updates.min_price : priceRange[0].toString();
+    const newMaxPrice = updates.max_price !== undefined ? updates.max_price : priceRange[1].toString();
+
+    if (newCategory) params.set('category', newCategory);
+    if (newSubcategories.length > 0) params.set('subcategory', newSubcategories.join(','));
+    if (newSize) params.set('size', newSize);
+    if (newMinPrice && newMinPrice !== '0') params.set('min_price', newMinPrice);
+    if (newMaxPrice && newMaxPrice !== '10000') params.set('max_price', newMaxPrice);
+
+    const queryString = params.toString();
+    return queryString ? `/shop?${queryString}` : '/shop';
+  };
+
+  // Handle filter changes
+  const handleFilterChange = (updates: Record<string, string | string[] | null>) => {
+    const newUrl = buildFilterUrl(updates);
+    router.visit(newUrl, { 
+      preserveState: false, 
+      preserveScroll: true,
+      only: ['products', 'filters']
+    });
+  };
+
+  // Toggle subcategory selection
+  const toggleSubcategory = (subcategorySlug: string) => {
+    const newSubcategories = selectedSubcategories.includes(subcategorySlug)
+      ? selectedSubcategories.filter(s => s !== subcategorySlug)
+      : [...selectedSubcategories, subcategorySlug];
+    
+    handleFilterChange({ subcategories: newSubcategories });
+  };
 
   const sortOptions = [
     { label: 'Recommended', value: 'recommended' },
@@ -47,51 +142,32 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
     { label: 'Price: High to Low', value: 'price_desc' },
   ];
 
-  // Map category names to filter values
-  const categoryMap: Record<string, string> = {
-    'hoodies': 'hoodies',
-    'hoodie': 'hoodies',
-    'oversized': 'oversized',
-    'oversized t-shirts': 'oversized',
-    'oversized tshirts': 'oversized',
-    'tshirts': 'tshirts',
-    't-shirts': 'tshirts',
-    't-shirt': 'tshirts',
-  };
+  // Sort products
+  const sortedProducts = useMemo(() => {
+    const sorted = [...products];
+    switch (sortBy) {
+      case 'price_asc':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'price_desc':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'newest':
+        return sorted.sort((a, b) => b.id - a.id);
+      default:
+        return sorted;
+    }
+  }, [products, sortBy]);
 
-  // Normalize category for filtering
-  const normalizeCategory = (category: string): string => {
-    const normalized = category.toLowerCase().trim();
-    return categoryMap[normalized] || normalized;
-  };
-
-  // Filter and sort products
-  const filteredProducts = products
-    .filter((product) => {
-      if (selectedCategory) {
-        const productCategory = normalizeCategory(product.category || '');
-        const selectedCategoryNormalized = normalizeCategory(selectedCategory);
-        if (productCategory !== selectedCategoryNormalized) {
-          return false;
-        }
-      }
-      if (product.price < priceRange[0] || product.price > priceRange[1]) {
-        return false;
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'price_asc':
-          return a.price - b.price;
-        case 'price_desc':
-          return b.price - a.price;
-        case 'newest':
-          return b.id - a.id;
-        default:
-          return 0;
-      }
-    });
+  // Build categories list with "All" option
+  const categoryList = useMemo(() => {
+    return [
+      { name: 'All', value: null, slug: null },
+      ...categories.map(cat => ({
+        name: cat.name,
+        value: cat.slug,
+        slug: cat.slug
+      }))
+    ];
+  }, [categories]);
 
   return (
     <MainLayout>
@@ -106,6 +182,24 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
             </Link>
             <span>/</span>
             <span className="text-neutral-900">Shop</span>
+            {selectedCategory && (
+              <>
+                <span>/</span>
+                <span className="text-neutral-900 capitalize">
+                  {categories.find(c => c.slug === selectedCategory)?.name || selectedCategory}
+                </span>
+              </>
+            )}
+            {selectedSubcategories.length > 0 && (
+              <>
+                <span>/</span>
+                <span className="text-neutral-900 capitalize">
+                  {selectedSubcategories.length === 1
+                    ? subcategories.find(s => s.slug === selectedSubcategories[0])?.name || selectedSubcategories[0]
+                    : `${selectedSubcategories.length} Prints`}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -119,16 +213,14 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
                   Categories
                 </h3>
                 <div className="space-y-1.5">
-                  {categories.map((category) => (
+                  {categoryList.map((category) => (
                     <button
                       key={category.name}
                       onClick={() => {
-                        setSelectedCategory(category.value);
-                        // Update URL without page reload
-                        const url = category.value 
-                          ? `/shop?category=${category.value}`
-                          : '/shop';
-                        router.visit(url, { preserveState: true, preserveScroll: true });
+                        handleFilterChange({ 
+                          category: category.value,
+                          subcategories: [] // Clear subcategories when category changes
+                        });
                       }}
                       className={`block w-full text-left px-3 py-2 rounded text-sm transition-colors ${
                         selectedCategory === category.value
@@ -142,6 +234,39 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
                 </div>
               </div>
 
+              {/* Prints (Subcategories) - Only show if category is selected */}
+              {selectedCategory && availableSubcategories.length > 0 && (
+                <div>
+                  <h3 className="font-bold text-sm tracking-wider uppercase mb-2">
+                    Prints
+                  </h3>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {availableSubcategories.map((subcategory) => (
+                      <button
+                        key={subcategory.id}
+                        onClick={() => toggleSubcategory(subcategory.slug)}
+                        className={`px-2 py-1.5 text-xs rounded border transition-colors ${
+                          selectedSubcategories.includes(subcategory.slug)
+                            ? 'border-neutral-900 bg-neutral-900 text-white'
+                            : 'border-neutral-300 text-neutral-700 hover:border-neutral-900 hover:bg-neutral-50'
+                        }`}
+                        title={subcategory.name}
+                      >
+                        <span className="truncate block">{subcategory.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {selectedSubcategories.length > 0 && (
+                    <button
+                      onClick={() => handleFilterChange({ subcategories: [] })}
+                      className="mt-2 text-xs text-neutral-500 hover:text-neutral-900 underline"
+                    >
+                      Clear all ({selectedSubcategories.length})
+                    </button>
+                  )}
+                </div>
+              )}
+
               {/* Price Range */}
               <div>
                 <h3 className="font-bold text-sm tracking-wider uppercase mb-3">
@@ -154,7 +279,14 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
                     max="10000"
                     step="100"
                     value={priceRange[1]}
-                    onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
+                    onChange={(e) => {
+                      const newMax = parseInt(e.target.value);
+                      setPriceRange([priceRange[0], newMax]);
+                      handleFilterChange({ 
+                        min_price: priceRange[0].toString(),
+                        max_price: newMax.toString()
+                      });
+                    }}
                     className="w-full"
                   />
                   <div className="flex items-center justify-between text-sm text-neutral-700">
@@ -170,41 +302,32 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
                   Size
                 </h3>
                 <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    onClick={() => {
+                      handleFilterChange({ size: null });
+                    }}
+                    className={`py-2 text-sm border rounded transition-colors ${
+                      !selectedSize
+                        ? 'border-neutral-900 bg-neutral-900 text-white'
+                        : 'border-neutral-300 hover:border-neutral-900'
+                    }`}
+                  >
+                    All
+                  </button>
                   {sizes.map((size) => (
                     <button
                       key={size}
-                      className="py-2 text-sm border border-neutral-300 rounded hover:border-neutral-900 transition-colors"
+                      onClick={() => {
+                        handleFilterChange({ size: size });
+                      }}
+                      className={`py-2 text-sm border rounded transition-colors ${
+                        selectedSize === size
+                          ? 'border-neutral-900 bg-neutral-900 text-white'
+                          : 'border-neutral-300 hover:border-neutral-900'
+                      }`}
                     >
                       {size}
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Colors */}
-              <div>
-                <h3 className="font-bold text-sm tracking-wider uppercase mb-3">
-                  Colors
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    { name: 'Black', hex: '#000000' },
-                    { name: 'White', hex: '#FFFFFF' },
-                    { name: 'Red', hex: '#DC2626' },
-                    { name: 'Blue', hex: '#2563EB' },
-                    { name: 'Green', hex: '#059669' },
-                    { name: 'Yellow', hex: '#FBBF24' },
-                    { name: 'Orange', hex: '#EA580C' },
-                    { name: 'Purple', hex: '#9333EA' },
-                    { name: 'Pink', hex: '#EC4899' },
-                    { name: 'Gray', hex: '#6B7280' },
-                  ].map((color) => (
-                    <button
-                      key={color.name}
-                      className="w-8 h-8 rounded-full border-2 border-neutral-300 hover:border-neutral-900 transition-colors flex-shrink-0"
-                      style={{ backgroundColor: color.hex }}
-                      title={color.name}
-                    />
                   ))}
                 </div>
               </div>
@@ -216,10 +339,16 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <div>
                   <h1 className="font-display font-bold text-3xl mb-2">
-                    All Products
+                    {selectedSubcategories.length > 0
+                      ? selectedSubcategories.length === 1
+                        ? subcategories.find(s => s.slug === selectedSubcategories[0])?.name || 'Products'
+                        : `${selectedSubcategories.length} Selected Prints`
+                      : selectedCategory
+                      ? categories.find(c => c.slug === selectedCategory)?.name || 'Products'
+                      : 'All Products'}
                   </h1>
                   <p className="text-neutral-600">
-                    Showing {filteredProducts.length} products
+                    Showing {sortedProducts.length} {sortedProducts.length === 1 ? 'product' : 'products'}
                   </p>
                 </div>
 
@@ -242,7 +371,7 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
 
               {/* Products Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map((product) => (
+                {sortedProducts.map((product) => (
                   <Link
                     key={product.id}
                     href={`/product/${product.slug}`}
@@ -252,12 +381,12 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     <div className="space-y-1">
                       <p className="text-[10px] font-semibold text-neutral-500 uppercase tracking-wider">
-                        {product.category}
+                        {product.subcategory || product.category}
                       </p>
                       <h3 className="text-sm font-medium text-neutral-900 group-hover:text-neutral-600 transition-colors">
                         {product.name}
@@ -271,15 +400,14 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
               </div>
 
               {/* Empty State */}
-              {filteredProducts.length === 0 && (
+              {sortedProducts.length === 0 && (
                 <div className="text-center py-16">
                   <p className="text-neutral-600 text-lg mb-4">
                     No products found matching your filters
                   </p>
                   <button
                     onClick={() => {
-                      setSelectedCategory(null);
-                      setPriceRange([0, 10000]);
+                      router.visit('/shop', { preserveState: false });
                     }}
                     className="text-sm font-medium text-neutral-900 underline hover:no-underline"
                   >
@@ -294,4 +422,3 @@ export default function Shop({ products, category: initialCategory }: ShopProps)
     </MainLayout>
   );
 }
-

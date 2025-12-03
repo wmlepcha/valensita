@@ -10,6 +10,9 @@ interface Slide {
   material: string;
   height: string;
   slug?: string;
+  premium_text?: string;
+  care_instructions?: string;
+  shipping_info?: string;
 }
 
 interface HeroProps {
@@ -109,13 +112,17 @@ export default function Hero({ slides: propSlides }: HeroProps) {
               </p>
               {/* Additional content for extra large screens */}
               <div className="hidden 2xl:block mt-6 space-y-2">
-                <p className="text-sm text-neutral-500 font-medium">Premium Quality • Limited Edition</p>
-                <Link 
-                  href={`/product/${slide.slug || 'shop'}`}
-                  className="inline-block text-sm text-neutral-900 underline hover:text-neutral-600 transition-colors"
-                >
-                  View Full Details →
-                </Link>
+                {slide.premium_text && (
+                  <p className="text-sm text-neutral-500 font-medium">{slide.premium_text}</p>
+                )}
+                {slide.slug && (
+                  <Link 
+                    href={`/product/${slide.slug}`}
+                    className="inline-block text-sm text-neutral-900 underline hover:text-neutral-600 transition-colors"
+                  >
+                    View Full Details →
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -187,16 +194,22 @@ export default function Hero({ slides: propSlides }: HeroProps) {
                 <div className="text-xs md:text-xs xl:text-xs 2xl:text-base font-medium">{slide.height}</div>
               </div>
               {/* Additional details for extra large screens */}
-              <div className="hidden 2xl:block space-y-3 pt-4 border-t border-neutral-200">
-                <div>
-                  <div className="text-sm text-neutral-500 uppercase tracking-widest mb-3">Care Instructions</div>
-                  <div className="text-base font-medium text-neutral-700">Machine wash cold • Hang dry • Do not bleach</div>
+              {(slide.care_instructions || slide.shipping_info) && (
+                <div className="hidden 2xl:block space-y-3 pt-4 border-t border-neutral-200">
+                  {slide.care_instructions && (
+                    <div>
+                      <div className="text-sm text-neutral-500 uppercase tracking-widest mb-3">Care Instructions</div>
+                      <div className="text-base font-medium text-neutral-700">{slide.care_instructions}</div>
+                    </div>
+                  )}
+                  {slide.shipping_info && (
+                    <div>
+                      <div className="text-sm text-neutral-500 uppercase tracking-widest mb-3">Shipping</div>
+                      <div className="text-base font-medium text-neutral-700">{slide.shipping_info}</div>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <div className="text-sm text-neutral-500 uppercase tracking-widest mb-3">Shipping</div>
-                  <div className="text-base font-medium text-neutral-700">Free shipping on orders over ₹5,000</div>
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Slide Indicators */}
@@ -230,18 +243,6 @@ export default function Hero({ slides: propSlides }: HeroProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                 </svg>
               </Link>
-              {/* Additional CTA for extra large screens */}
-              <div className="hidden 2xl:block">
-                <Link
-                  href={`/product/${slide.slug || 'shop'}`}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-white border-2 border-neutral-900 text-neutral-900 rounded-full hover:bg-neutral-900 hover:text-white transition-colors font-semibold text-sm"
-                >
-                  Shop Now
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
             </div>
           </div>
         </div>
@@ -311,5 +312,6 @@ export default function Hero({ slides: propSlides }: HeroProps) {
     </section>
   );
 }
+
 
 

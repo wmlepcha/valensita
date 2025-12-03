@@ -302,6 +302,42 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
                 </div>
               )}
 
+              {/* Additional Product Information */}
+              {(product.specifications?.CARE || product.specifications?.SHIPPING || product.specifications?.RETURNS) && (
+                <div className="border-t border-neutral-200 pt-6 space-y-4">
+                  {product.specifications?.CARE && (
+                    <div>
+                      <div className="text-xs font-bold tracking-widest uppercase text-neutral-500 mb-2">
+                        Care Instructions
+                      </div>
+                      <div className="text-sm text-neutral-700">
+                        {product.specifications.CARE}
+                      </div>
+                    </div>
+                  )}
+                  {product.specifications?.SHIPPING && (
+                    <div>
+                      <div className="text-xs font-bold tracking-widest uppercase text-neutral-500 mb-2">
+                        Shipping
+                      </div>
+                      <div className="text-sm text-neutral-700">
+                        {product.specifications.SHIPPING}
+                      </div>
+                    </div>
+                  )}
+                  {product.specifications?.RETURNS && (
+                    <div>
+                      <div className="text-xs font-bold tracking-widest uppercase text-neutral-500 mb-2">
+                        Returns
+                      </div>
+                      <div className="text-sm text-neutral-700">
+                        {product.specifications.RETURNS}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Quantity & Add to Cart */}
               <div className="pt-6 space-y-4">
                 {product.inStock ? (

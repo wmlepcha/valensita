@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Helpers\ProductImageHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -27,7 +28,7 @@ class CartController extends Controller
                 continue;
             }
 
-            $image = $product->images->first()?->image_url ?? '/storage/images/placeholder.jpg';
+            $image = ProductImageHelper::getFirstImageUrl($product);
             $itemTotal = $product->price * $item['quantity'];
             $total += $itemTotal;
 

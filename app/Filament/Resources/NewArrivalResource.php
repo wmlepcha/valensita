@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\Concerns\HasProductRelationship;
 use App\Filament\Resources\NewArrivalResource\Pages;
 use App\Filament\Resources\NewArrivalResource\RelationManagers;
 use App\Models\NewArrival;
@@ -15,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class NewArrivalResource extends Resource
 {
+    use HasProductRelationship;
     protected static ?string $model = NewArrival::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-sparkles';
@@ -33,49 +35,8 @@ class NewArrivalResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Product Selection')
                     ->schema([
-                        Forms\Components\Select::make('product_id')
-                            ->label('Product (Optional)')
-                            ->relationship('product', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->nullable()
-                            ->helperText('Optionally link to a product. New Arrivals can work independently with their own images.'),
-                    ]),
-                
-                Forms\Components\Section::make('Images')
-                    ->schema([
-                        Forms\Components\FileUpload::make('image_url')
-                            ->label('Main Image')
-                            ->image()
-                            ->directory('new-arrivals-images')
-                            ->disk('public')
-                            ->visibility('public')
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                null,
-                                '16:9',
-                                '4:3',
-                                '1:1',
-                            ])
-                            ->maxSize(10240) // 10MB
-                            ->helperText('Main product image')
-                            ->columnSpanFull(),
-                        Forms\Components\FileUpload::make('hover_image_url')
-                            ->label('Hover Image (Optional)')
-                            ->image()
-                            ->directory('new-arrivals-images')
-                            ->disk('public')
-                            ->visibility('public')
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                null,
-                                '16:9',
-                                '4:3',
-                                '1:1',
-                            ])
-                            ->maxSize(10240) // 10MB
-                            ->helperText('Image shown on hover (optional)')
-                            ->columnSpanFull(),
+                        static::productSelectField(),
+                        static::productInfoPlaceholder(),
                     ]),
                 
                 Forms\Components\Section::make('Display Settings')
@@ -145,12 +106,7 @@ class NewArrivalResource extends Resource
                         // Otherwise, it's a new uploaded file - use disk URL
                         return \Illuminate\Support\Facades\Storage::disk('public')->url($imageUrl);
                     }),
-                Tables\Columns\TextColumn::make('product.name')
-                    ->label('Product')
-                    ->searchable()
-                    ->sortable()
-                    ->placeholder('No product linked')
-                    ->default('—'),
+                static::productTableColumn(),
                 Tables\Columns\TextColumn::make('look_number')
                     ->label('Look')
                     ->searchable(),

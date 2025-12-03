@@ -70,8 +70,8 @@ class CategorySectionResource extends Resource
                                 '4:3',
                                 '1:1',
                             ])
-                            ->maxSize(10240) // 10MB
-                            ->helperText('Main banner image for this category section')
+                            ->maxSize(2048) // 2MB
+                            ->helperText('Main banner image for this category section. Maximum file size: 2MB. Please compress images before uploading.')
                             ->columnSpanFull(),
                     ]),
                 

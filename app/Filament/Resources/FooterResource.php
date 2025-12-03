@@ -60,8 +60,8 @@ class FooterResource extends Resource
                                 '4:3',
                                 '1:1',
                             ])
-                            ->maxSize(5120) // 5MB
-                            ->helperText('Upload the footer logo image')
+                            ->maxSize(2048) // 2MB
+                            ->helperText('Upload the footer logo image. Maximum file size: 2MB. Please compress images before uploading.')
                             ->columnSpanFull(),
                     ]),
                 

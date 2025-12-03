@@ -45,7 +45,7 @@ class MenuResource extends Resource
                     ->url()
                     ->maxLength(255)
                     ->label('Main Link URL')
-                    ->helperText('The main link when clicking the menu name'),
+                    ->helperText('Only used if this menu has no items. If menu has items, the menu name is not clickable (it only opens the mega menu). Leave empty to use /{slug} as fallback.'),
                 Forms\Components\TextInput::make('title')
                     ->maxLength(255)
                     ->label('Mega Menu Title')

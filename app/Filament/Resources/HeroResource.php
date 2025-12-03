@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\Concerns\HasProductRelationship;
 use App\Filament\Resources\HeroResource\Pages;
 use App\Models\HeroItem;
 use Filament\Forms;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class HeroResource extends Resource
 {
+    use HasProductRelationship;
     protected static ?string $model = HeroItem::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
@@ -30,41 +32,41 @@ class HeroResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Basic Information')
+                Forms\Components\Section::make('Product Selection')
+                    ->schema([
+                        static::productSelectField(),
+                        static::productInfoPlaceholder(),
+                    ]),
+                
+                Forms\Components\Section::make('Hero Content')
                     ->schema([
                         Forms\Components\TextInput::make('title')
-                            ->required()
+                            ->label('Product Name / Title')
                             ->maxLength(255)
-                            ->label('Title')
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
-                                if ($operation !== 'create') {
-                                    return;
-                                }
-                                $set('slug', \Illuminate\Support\Str::slug($state));
-                            }),
-                        Forms\Components\TextInput::make('slug')
-                            ->required()
-                            ->maxLength(255)
-                            ->unique(ignoreRecord: true)
-                            ->label('URL Slug')
-                            ->helperText('Auto-generated from title, or customize it'),
+                            ->placeholder('e.g., Borg Bomber Jacket In Black')
+                            ->helperText('Product name displayed in hero. If product is linked, product name will be used automatically.'),
                         Forms\Components\TextInput::make('price')
-                            ->required()
+                            ->label('Price')
                             ->numeric()
                             ->prefix('₹')
-                            ->label('Price'),
+                            ->step(0.01)
+                            ->placeholder('e.g., 29999')
+                            ->helperText('Product price. If product is linked, product price will be used automatically.'),
+                        Forms\Components\TextInput::make('premium_text')
+                            ->label('Premium Text')
+                            ->maxLength(255)
+                            ->placeholder('e.g., Premium Quality • Limited Edition')
+                            ->helperText('Text displayed below price (e.g., "Premium Quality • Limited Edition")'),
                     ])
-                    ->columns(2),
+                    ->columns(3),
                 
-                Forms\Components\Section::make('Image')
+                Forms\Components\Section::make('Hero Image')
                     ->schema([
                         Forms\Components\FileUpload::make('image_url')
                             ->label('Hero Image')
                             ->image()
                             ->directory('hero-images')
-                            ->disk('public')
-                            ->visibility('public')
+                            ->maxSize(2048)
                             ->imageEditor()
                             ->imageEditorAspectRatios([
                                 null,
@@ -72,40 +74,44 @@ class HeroResource extends Resource
                                 '4:3',
                                 '1:1',
                             ])
-                            ->maxSize(10240) // 10MB
-                            ->helperText('Main image for hero banner')
+                            ->helperText('Upload hero image (max 2MB). If product is linked, product images will be used as fallback.')
                             ->columnSpanFull(),
                     ]),
                 
-                Forms\Components\Section::make('Product Details')
+                Forms\Components\Section::make('Hero Display Details')
                     ->schema([
                         Forms\Components\TextInput::make('lining')
                             ->maxLength(255)
                             ->label('Lining')
                             ->placeholder('e.g., 100% Cotton')
-                            ->helperText('Displayed as "Lining" in hero banner'),
+                            ->helperText('Displayed as "Lining" in hero banner. If product has specifications, they will be used as fallback.'),
                         Forms\Components\TextInput::make('material')
                             ->maxLength(255)
                             ->label('Material')
                             ->placeholder('e.g., Size Medium')
-                            ->helperText('Displayed as "Material" in hero banner'),
+                            ->helperText('Displayed as "Material" in hero banner. If product has specifications, they will be used as fallback.'),
                         Forms\Components\TextInput::make('height')
                             ->maxLength(255)
                             ->label('Height')
                             ->placeholder('e.g., 5.11/180 cm')
-                            ->helperText('Displayed as "Height" in hero banner'),
+                            ->helperText('Displayed as "Height" in hero banner. If product has specifications, they will be used as fallback.'),
                     ])
                     ->columns(3),
                 
-                Forms\Components\Section::make('Product Link (Optional)')
+                Forms\Components\Section::make('Additional Information')
                     ->schema([
-                        Forms\Components\Select::make('product_id')
-                            ->label('Link to Product')
-                            ->relationship('product', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->nullable()
-                            ->helperText('Optionally link to an actual product for inventory management'),
+                        Forms\Components\Textarea::make('care_instructions')
+                            ->label('Care Instructions')
+                            ->rows(3)
+                            ->placeholder('e.g., Machine wash cold • Hang dry • Do not bleach')
+                            ->helperText('Care instructions displayed on product detail page')
+                            ->columnSpanFull(),
+                        Forms\Components\Textarea::make('shipping_info')
+                            ->label('Shipping Information')
+                            ->rows(2)
+                            ->placeholder('e.g., Free shipping on orders over ₹5,000')
+                            ->helperText('Shipping information displayed on product detail page')
+                            ->columnSpanFull(),
                     ]),
                 
                 Forms\Components\Section::make('Settings')
@@ -152,18 +158,12 @@ class HeroResource extends Resource
                         // Otherwise, it's a new uploaded file - use disk URL
                         return \Illuminate\Support\Facades\Storage::disk('public')->url($imageUrl);
                     }),
-                Tables\Columns\TextColumn::make('title')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('slug')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('price')
+                static::productTableColumn(),
+                Tables\Columns\TextColumn::make('product.price')
+                    ->label('Price')
                     ->money('INR')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('product.name')
-                    ->label('Linked Product')
-                    ->searchable()
-                    ->placeholder('No product linked')
+                    ->sortable()
+                    ->placeholder('—')
                     ->default('—'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean(),

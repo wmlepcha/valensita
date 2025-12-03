@@ -2,30 +2,32 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\CategoryResource\Pages;
-use App\Models\Category;
+use App\Filament\Resources\SubcategoryResource\Pages;
+use App\Filament\Resources\SubcategoryResource\RelationManagers;
+use App\Models\Subcategory;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class CategoryResource extends Resource
+class SubcategoryResource extends Resource
 {
-    protected static ?string $model = Category::class;
+    protected static ?string $model = Subcategory::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';
 
-    protected static ?string $navigationLabel = 'Categories';
+    protected static ?string $navigationLabel = 'Subcategories';
 
     protected static ?string $navigationGroup = 'Inventory';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
-    protected static ?string $modelLabel = 'Category';
+    protected static ?string $modelLabel = 'Subcategory';
 
-    protected static ?string $pluralModelLabel = 'Categories';
+    protected static ?string $pluralModelLabel = 'Subcategories';
 
     public static function shouldRegisterNavigation(): bool
     {
@@ -38,10 +40,28 @@ class CategoryResource extends Resource
             ->schema([
                 Forms\Components\Section::make('Basic Information')
                     ->schema([
+                        Forms\Components\Select::make('category_id')
+                            ->label('Category')
+                            ->relationship('category', 'name', fn ($query) => $query->where('is_active', true))
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(fn ($state, Forms\Set $set) => $set('slug', \Illuminate\Support\Str::slug($state))),
+                                Forms\Components\TextInput::make('slug')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique(\App\Models\Category::class, 'slug'),
+                            ])
+                            ->helperText('Select the parent category for this subcategory'),
                         Forms\Components\TextInput::make('name')
                             ->required()
                             ->maxLength(255)
-                            ->label('Category Name')
+                            ->label('Subcategory Name')
                             ->live(onBlur: true)
                             ->afterStateUpdated(function (string $operation, $state, Forms\Set $set) {
                                 if ($operation !== 'create') {
@@ -59,16 +79,16 @@ class CategoryResource extends Resource
                             ->rows(3)
                             ->columnSpanFull()
                             ->label('Description')
-                            ->helperText('Category description (optional)'),
+                            ->helperText('Subcategory description (optional)'),
                     ])
                     ->columns(2),
 
                 Forms\Components\Section::make('Image')
                     ->schema([
                         Forms\Components\FileUpload::make('image_url')
-                            ->label('Category Image')
+                            ->label('Subcategory Image')
                             ->image()
-                            ->directory('category-images')
+                            ->directory('subcategory-images')
                             ->disk('public')
                             ->visibility('public')
                             ->imageEditor()
@@ -79,7 +99,7 @@ class CategoryResource extends Resource
                                 '1:1',
                             ])
                             ->maxSize(2048) // 2MB
-                            ->helperText('Optional category image. Maximum file size: 2MB. Please compress images before uploading.')
+                            ->helperText('Optional subcategory image. Maximum file size: 2MB. Please compress images before uploading.')
                             ->columnSpanFull(),
                     ]),
 
@@ -88,7 +108,7 @@ class CategoryResource extends Resource
                         Forms\Components\Toggle::make('is_active')
                             ->label('Active')
                             ->default(true)
-                            ->helperText('Only active categories are visible on the website'),
+                            ->helperText('Only active subcategories are visible on the website'),
                         Forms\Components\TextInput::make('order')
                             ->numeric()
                             ->default(0)
@@ -126,6 +146,11 @@ class CategoryResource extends Resource
                         
                         return \Illuminate\Support\Facades\Storage::disk('public')->url($imageUrl);
                     }),
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Category')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium'),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
                     ->sortable()
@@ -150,6 +175,11 @@ class CategoryResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('category_id')
+                    ->label('Category')
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload(),
                 Tables\Filters\TernaryFilter::make('is_active')
                     ->label('Active')
                     ->placeholder('All')
@@ -186,9 +216,9 @@ class CategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCategories::route('/'),
-            'create' => Pages\CreateCategory::route('/create'),
-            'edit' => Pages\EditCategory::route('/{record}/edit'),
+            'index' => Pages\ListSubcategories::route('/'),
+            'create' => Pages\CreateSubcategory::route('/create'),
+            'edit' => Pages\EditSubcategory::route('/{record}/edit'),
         ];
     }
 }

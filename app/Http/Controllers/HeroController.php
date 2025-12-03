@@ -8,6 +8,7 @@ use App\Models\NewArrival;
 use App\Models\CategorySection;
 use App\Models\TrendingItem;
 use App\Models\AboutSection;
+use App\Helpers\ProductImageHelper;
 use Inertia\Inertia;
 
 class HeroController extends Controller
@@ -18,26 +19,59 @@ class HeroController extends Controller
     public function home()
     {
         // Get hero items for hero banner
+        // Use product data when product_id exists, otherwise fallback to hero item data
         $heroProducts = HeroItem::active()
             ->ordered()
-            ->with('product')
+            ->with(['product.images', 'product.specifications'])
             ->take(3)
             ->get()
             ->map(function ($heroItem) {
-                return [
-                    'id' => $heroItem->id,
-                    'title' => $heroItem->title,
-                    'price' => '₹' . number_format($heroItem->price, 0),
-                    'image' => $heroItem->image_url ?? '/storage/images/placeholder.jpg',
-                    'lining' => $heroItem->lining ?? '100% Cotton',
-                    'material' => $heroItem->material ?? 'Size Medium',
-                    'height' => $heroItem->height ?? '5.11/180 cm',
-                    'slug' => $heroItem->slug,
-                ];
+                $product = $heroItem->product;
+                
+                if ($product && $product->slug) {
+                    // Use product data as primary source, but allow hero item overrides
+                    $specs = $product->specifications->pluck('value', 'key')->toArray();
+                    
+                    // Use hero item image if available, otherwise use product image
+                    $image = $heroItem->image_url 
+                        ? ProductImageHelper::formatImageUrl($heroItem->image_url) 
+                        : ProductImageHelper::getFirstImageUrl($product);
+                    
+                    return [
+                        'id' => $product->id,
+                        'title' => $heroItem->title ?? $product->name, // Hero item title overrides product name
+                        'price' => '₹' . number_format($heroItem->price ?? $product->price, 0), // Hero item price overrides product price
+                        'image' => $image, // Hero item image overrides product image
+                        'lining' => $heroItem->lining ?? $specs['LINING'] ?? '100% Cotton',
+                        'material' => $heroItem->material ?? $specs['MATERIAL'] ?? 'Size Medium',
+                        'height' => $heroItem->height ?? $specs['HEIGHT'] ?? '5.11/180 cm',
+                        'premium_text' => $heroItem->premium_text,
+                        'care_instructions' => $heroItem->care_instructions ?? $specs['CARE'] ?? null,
+                        'shipping_info' => $heroItem->shipping_info ?? $specs['SHIPPING'] ?? null,
+                        'slug' => $product->slug, // Only use actual database slug
+                    ];
+                } else {
+                    // Fallback to hero item data (for backward compatibility)
+                    return [
+                        'id' => $heroItem->id,
+                        'title' => $heroItem->title ?? 'Hero Item',
+                        'price' => '₹' . number_format($heroItem->price ?? 0, 0),
+                        'image' => ProductImageHelper::formatImageUrl($heroItem->image_url),
+                        'lining' => $heroItem->lining ?? '100% Cotton',
+                        'material' => $heroItem->material ?? 'Size Medium',
+                        'height' => $heroItem->height ?? '5.11/180 cm',
+                        'premium_text' => $heroItem->premium_text,
+                        'care_instructions' => $heroItem->care_instructions,
+                        'shipping_info' => $heroItem->shipping_info,
+                        'slug' => null, // No slug if no product linked
+                    ];
+                }
             });
 
         // Get new arrival products from NewArrival model
+        // product_id is now required, so we always use product data
         $newArrivals = NewArrival::active()
+            ->whereNotNull('product_id') // Only get items with products linked
             ->ordered()
             ->with(['product.images', 'product.categoryRelation'])
             ->take(4)
@@ -45,57 +79,57 @@ class HeroController extends Controller
             ->map(function ($newArrival) {
                 $product = $newArrival->product;
                 
-                // Use new_arrival images if available, otherwise fall back to product images
-                $mainImage = $newArrival->getRawOriginal('image_url');
-                if (!$mainImage) {
-                    // If product exists, use its images, otherwise use placeholder
-                    $images = $product?->images ?? collect();
-                    $mainImage = $images->first()?->image_url ?? '/storage/images/placeholder.jpg';
-                } else {
-                    // Format the image URL using the accessor
-                    $mainImage = $newArrival->image_url;
+                if (!$product) {
+                    return null; // Skip if product doesn't exist
                 }
                 
-                $hoverImage = $newArrival->getRawOriginal('hover_image_url');
-                if (!$hoverImage) {
-                    // If product exists, use its images, otherwise null
-                    $images = $product?->images ?? collect();
-                    $hoverImage = $images->count() > 1 ? $images->get(1)->image_url : null;
-                } else {
-                    // Format the hover image URL using the accessor
-                    $hoverImage = $newArrival->hover_image_url;
-                }
+                $allImages = ProductImageHelper::getAllImageUrls($product);
                 
                 return [
-                    'id' => $product?->id ?? $newArrival->id,
-                    'name' => $product?->name ?? 'New Arrival',
-                    'price' => (float) ($product?->price ?? 0),
-                    'image' => $mainImage,
-                    'hoverImage' => $hoverImage,
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => (float) $product->price,
+                    'image' => $allImages[0] ?? ProductImageHelper::getFirstImageUrl($product),
+                    'hoverImage' => $allImages[1] ?? null,
                     'badge' => $newArrival->look_number,
-                    'category' => $newArrival->drop_number ?? $product?->categoryRelation?->name ?? $product?->category ?? 'New Arrivals',
-                    'slug' => $product?->slug ?? 'new-arrival-' . $newArrival->id,
+                    'category' => $newArrival->drop_number ?? $product->categoryRelation?->name ?? $product->category ?? 'New Arrivals',
+                    'slug' => $product->slug,
                 ];
-            });
+            })
+            ->filter() // Remove null values
+            ->values();
 
-        // Get trending items (organized by row)
+        // Get trending items from TrendingItem table (manually curated in Filament)
+        // product_id is now required, so we always use product data
         $trendingItems = TrendingItem::active()
+            ->whereNotNull('product_id') // Only get items with products linked
+            ->with(['product.images', 'product.categoryRelation'])
             ->ordered()
             ->get()
             ->groupBy('row')
             ->map(function ($items, $row) {
                 return $items->take(4)->map(function ($item) {
+                    $product = $item->product;
+                    
+                    if (!$product) {
+                        return null; // Skip if product doesn't exist
+                    }
+                    
+                    $allImages = ProductImageHelper::getAllImageUrls($product);
+                    
                     return [
-                        'id' => $item->id,
-                        'name' => $item->title,
-                        'price' => 0, // Price not used in trending display, but required by frontend interface
-                        'image' => $item->image_url ?? '/storage/images/placeholder.jpg',
-                        'hoverImage' => $item->hover_image_url,
-                        'category' => $item->category_label,
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => (float) $product->price,
+                        'image' => $allImages[0] ?? ProductImageHelper::getFirstImageUrl($product),
+                        'hoverImage' => $allImages[1] ?? null,
+                        'category' => $product->categoryRelation?->name ?? $product->category ?? 'Product',
                         'backgroundGradient' => $item->background_gradient ?? 'linear-gradient(135deg, #f5f5f5 0%, #e5e5e5 100%)',
-                        'slug' => $item->slug,
+                        'slug' => $product->slug,
                     ];
-                })->values();
+                })
+                ->filter() // Remove null values
+                ->values();
             });
         
         $trendingShirts = $trendingItems->get(1, collect())->toArray();

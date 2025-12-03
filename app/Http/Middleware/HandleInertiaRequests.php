@@ -40,9 +40,13 @@ class HandleInertiaRequests extends Middleware
                 return \App\Models\Menu::active()
                     ->ordered()
                     ->with(['activeItems' => function ($query) {
-                        $query->topLevel()->ordered()->with(['activeChildren' => function ($subQuery) {
-                            $subQuery->ordered();
-                        }]);
+                        $query->topLevel()->ordered()->with([
+                            'category',
+                            'subcategory.category',
+                            'activeChildren' => function ($subQuery) {
+                                $subQuery->ordered()->with(['category', 'subcategory.category']);
+                            }
+                        ]);
                     }])
                     ->get()
                     ->map(function ($menu) {
@@ -53,17 +57,37 @@ class HandleInertiaRequests extends Middleware
                             'url' => $menu->url,
                             'title' => $menu->title,
                             'items' => $menu->activeItems->map(function ($item) {
+                                // Generate URL: prioritize subcategory, then category, otherwise use manual URL
+                                $url = '#';
+                                if ($item->subcategory_id && $item->subcategory && $item->subcategory->category) {
+                                    $url = '/shop?category=' . $item->subcategory->category->slug . '&subcategory=' . $item->subcategory->slug;
+                                } elseif ($item->category_id && $item->category) {
+                                    $url = '/shop?category=' . $item->category->slug;
+                                } else {
+                                    $url = $item->getRawOriginal('url') ?? '#';
+                                }
+                                
                                 return [
                                     'id' => $item->id,
                                     'label' => $item->label,
-                                    'url' => $item->url,
+                                    'url' => $url,
                                     'image_url' => $item->image_url,
                                     'image_alt' => $item->image_alt,
                                     'children' => $item->activeChildren->map(function ($child) {
+                                        // Generate URL: prioritize subcategory, then category, otherwise use manual URL
+                                        $childUrl = '#';
+                                        if ($child->subcategory_id && $child->subcategory && $child->subcategory->category) {
+                                            $childUrl = '/shop?category=' . $child->subcategory->category->slug . '&subcategory=' . $child->subcategory->slug;
+                                        } elseif ($child->category_id && $child->category) {
+                                            $childUrl = '/shop?category=' . $child->category->slug;
+                                        } else {
+                                            $childUrl = $child->getRawOriginal('url') ?? '#';
+                                        }
+                                        
                                         return [
                                             'id' => $child->id,
                                             'label' => $child->label,
-                                            'url' => $child->url,
+                                            'url' => $childUrl,
                                             'image_url' => $child->image_url,
                                             'image_alt' => $child->image_alt,
                                         ];

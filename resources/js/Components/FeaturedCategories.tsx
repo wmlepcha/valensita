@@ -21,33 +21,12 @@ export default function FeaturedCategories({ categories }: FeaturedCategoriesPro
   // Only display first 2 category sections (as per design requirement)
   const displayCategories = categories.slice(0, 2);
 
-  // Map category names to shop category filters
-  // IGNORE database link field - generate links based on category name only
-  const getCategoryLink = (categoryName: string): string => {
-    // Extract category from name (remove HTML tags if any)
-    const nameText = categoryName.replace(/<[^>]*>/g, '').toLowerCase().trim();
-    
-    // Map category names to shop filters
-    if (nameText.includes('hoodie')) {
-      return '/shop?category=hoodies';
-    }
-    if (nameText.includes('oversized')) {
-      return '/shop?category=oversized';
-    }
-    if (nameText.includes('t-shirt') || nameText.includes('tshirt')) {
-      return '/shop?category=tshirts';
-    }
-
-    // Default to shop page
-    return '/shop';
-  };
-
   return (
     <section className="w-full overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0 w-full">
         {displayCategories.map((category) => {
-          // Generate link based on category name only (ignore database link field)
-          const link = getCategoryLink(category.name);
+          // Use link from database, or generate from category name if link not provided
+          const link = category.link || '/shop';
 
           return (
             <Link

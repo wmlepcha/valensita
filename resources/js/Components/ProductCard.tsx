@@ -96,7 +96,7 @@ export default function ProductCard({
 
   return (
     <Link
-      href={`/products/${id}`}
+      href={slug ? `/product/${slug}` : `/product/${id}`}
       className="group block animate-fade-in"
     >
       {/* Image Container */}

@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProductResource\Pages;
 use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Product;
+use App\Helpers\ProductImageHelper;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -77,7 +78,40 @@ class ProductResource extends Resource
                                     ->default(true),
                             ])
                             ->required()
-                            ->helperText('Select a category or create a new one'),
+                            ->helperText('Select a category or create a new one')
+                            ->live()
+                            ->afterStateUpdated(fn (Forms\Set $set) => $set('subcategory_id', null)),
+                        Forms\Components\Select::make('subcategory_id')
+                            ->label('Subcategory')
+                            ->relationship('subcategory', 'name', fn ($query, Forms\Get $get) => 
+                                $query->where('category_id', $get('category_id'))
+                                      ->where('is_active', true)
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\Select::make('category_id')
+                                    ->label('Category')
+                                    ->relationship('category', 'name', fn ($query) => $query->where('is_active', true))
+                                    ->required()
+                                    ->searchable()
+                                    ->preload(),
+                                Forms\Components\TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                        $set('slug', \Illuminate\Support\Str::slug($state));
+                                    }),
+                                Forms\Components\TextInput::make('slug')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique(\App\Models\Subcategory::class, 'slug'),
+                                Forms\Components\Toggle::make('is_active')
+                                    ->default(true),
+                            ])
+                            ->visible(fn (Forms\Get $get) => !empty($get('category_id')))
+                            ->helperText('Optional: Select a subcategory (e.g., Solid, Animal Print, Graffiti)'),
                     ])
                     ->columns(2),
 
@@ -188,24 +222,7 @@ class ProductResource extends Resource
                     ->defaultImageUrl(url('/storage/images/placeholder.jpg'))
                     ->getStateUsing(function ($record) {
                         $firstImage = $record->images()->first();
-                        if (!$firstImage || !$firstImage->image_url) {
-                            return null;
-                        }
-                        
-                        $imageUrl = $firstImage->getRawOriginal('image_url');
-                        
-                        // If it's already a full URL, return as is
-                        if (str_starts_with($imageUrl, 'http://') || str_starts_with($imageUrl, 'https://')) {
-                            return $imageUrl;
-                        }
-                        
-                        // If it starts with /storage/, it's an old path - return as URL
-                        if (str_starts_with($imageUrl, '/storage/')) {
-                            return url($imageUrl);
-                        }
-                        
-                        // Otherwise, it's a new uploaded file - use disk URL
-                        return \Illuminate\Support\Facades\Storage::disk('public')->url($imageUrl);
+                        return ProductImageHelper::formatForFilamentTable($firstImage);
                     }),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable()
@@ -219,6 +236,14 @@ class ProductResource extends Resource
                     ->badge()
                     ->color('gray')
                     ->placeholder('No category'),
+                Tables\Columns\TextColumn::make('subcategory.name')
+                    ->label('Subcategory')
+                    ->searchable()
+                    ->sortable()
+                    ->badge()
+                    ->color('info')
+                    ->placeholder('—')
+                    ->default('—'),
                 Tables\Columns\TextColumn::make('price')
                     ->money('USD')
                     ->sortable()

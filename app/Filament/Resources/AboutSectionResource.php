@@ -60,8 +60,8 @@ class AboutSectionResource extends Resource
                                 '21:9',
                                 '4:3',
                             ])
-                            ->maxSize(10240) // 10MB
-                            ->helperText('Background image for the About Us section')
+                            ->maxSize(2048) // 2MB
+                            ->helperText('Background image for the About Us section. Maximum file size: 2MB. Please compress images before uploading.')
                             ->columnSpanFull(),
                     ]),
                 

@@ -112,16 +112,30 @@ export default function Header() {
                     onMouseEnter={() => hasItems && openMenu(menu.id)}
                     onMouseLeave={() => hasItems && closeMenu(menu.id)}
                   >
-                    <Link
-                      href={menu.url || `/${menu.slug}`}
-                      className={`text-xs font-medium tracking-widest uppercase transition-colors ${
-                        isOpen 
-                          ? 'text-neutral-600' 
-                          : 'text-neutral-900 hover:text-neutral-600'
-                      }`}
-                    >
-                      {menu.name}
-                    </Link>
+                    {hasItems ? (
+                      // If menu has items, make it non-clickable (just opens mega menu)
+                      <span
+                        className={`text-xs font-medium tracking-widest uppercase transition-colors cursor-pointer ${
+                          isOpen 
+                            ? 'text-neutral-600' 
+                            : 'text-neutral-900 hover:text-neutral-600'
+                        }`}
+                      >
+                        {menu.name}
+                      </span>
+                    ) : (
+                      // If menu has no items, make it clickable
+                      <Link
+                        href={menu.url || `/${menu.slug}`}
+                        className={`text-xs font-medium tracking-widest uppercase transition-colors ${
+                          isOpen 
+                            ? 'text-neutral-600' 
+                            : 'text-neutral-900 hover:text-neutral-600'
+                        }`}
+                      >
+                        {menu.name}
+                      </Link>
+                    )}
                   </div>
                 );
               })}
@@ -221,44 +235,56 @@ export default function Header() {
           {mobileMenuOpen && (
             <nav className="lg:hidden py-6 border-t border-neutral-200">
               <div className="flex flex-col gap-4">
-                {menus?.map((menu) => (
-                  <div key={menu.id}>
-                    <Link
-                      href={menu.url || `/${menu.slug}`}
-                      className="text-xs font-bold tracking-widest uppercase text-neutral-900 hover:text-neutral-600 py-2 block"
-                    >
-                      {menu.name}
-                    </Link>
-                    {menu.items && menu.items.length > 0 && (
-                      <div className="ml-4 mt-2 space-y-2">
-                        {menu.items.map((item) => (
-                          <div key={item.id}>
-                            <Link 
-                              href={item.url} 
-                              className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block"
-                            >
-                              {item.label}
-                            </Link>
-                            {/* Submenu items in mobile */}
-                            {item.children && item.children.length > 0 && (
-                              <div className="ml-4 mt-1 space-y-1">
-                                {item.children.map((child) => (
-                                  <Link 
-                                    key={child.id}
-                                    href={child.url} 
-                                    className="text-xs tracking-wide uppercase text-neutral-500 hover:text-neutral-700 block"
-                                  >
-                                    {child.label}
-                                  </Link>
-                                ))}
+                {menus?.map((menu) => {
+                  const hasItems = menu.items && menu.items.length > 0;
+                  
+                  return (
+                    <div key={menu.id}>
+                      {hasItems ? (
+                        // If menu has items, show as non-clickable header
+                        <>
+                          <span className="text-xs font-bold tracking-widest uppercase text-neutral-900 py-2 block">
+                            {menu.name}
+                          </span>
+                          <div className="ml-4 mt-2 space-y-2">
+                            {menu.items.map((item) => (
+                              <div key={item.id}>
+                                <Link 
+                                  href={item.url} 
+                                  className="text-xs tracking-wide uppercase text-neutral-600 hover:text-neutral-900 block"
+                                >
+                                  {item.label}
+                                </Link>
+                                {/* Submenu items in mobile */}
+                                {item.children && item.children.length > 0 && (
+                                  <div className="ml-4 mt-1 space-y-1">
+                                    {item.children.map((child) => (
+                                      <Link 
+                                        key={child.id}
+                                        href={child.url} 
+                                        className="text-xs tracking-wide uppercase text-neutral-500 hover:text-neutral-700 block"
+                                      >
+                                        {child.label}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            ))}
                           </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                        </>
+                      ) : (
+                        // If menu has no items, make it clickable
+                        <Link
+                          href={menu.url || `/${menu.slug}`}
+                          className="text-xs font-bold tracking-widest uppercase text-neutral-900 hover:text-neutral-600 py-2 block"
+                        >
+                          {menu.name}
+                        </Link>
+                      )}
+                    </div>
+                  );
+                })}
 
                 <Link
                   href="/account"
